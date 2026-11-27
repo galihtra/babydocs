@@ -23,15 +23,19 @@
 
 ## Bedah Kode Asli (Baris demi Baris)
 
-{{1–3 kalimat pengantar santai, lalu kutip potongan kode kunci langsung dari file sumber dan jelaskan tiap baris/bloknya:}}
+{{Pecah seluruh logika penting di file ini menjadi beberapa blok kode asli (constructor/props, setiap method, percabangan, error handling, build/render) lalu jelaskan tiap baris/bloknya:}}
+
+### Bagian 1: {{NAMA_BAGIAN_ATAU_METHOD}}
 
 ```{{bahasa}}
-{{POTONGAN_KODE_ASLI_KUNCI — 8 s.d. 40 baris persis dari file sumber}}
+{{KODE_ASLI_BAGIAN_1 — persis dari file sumber}}
 ```
 
 - `{{baris / blok 1}}` → {{apa yang dilakukan + kenapa ditulis begitu}}
 - `{{baris / blok 2}}` → {{apa yang terjadi saat loading / disabled / kosong / error}}
 - `{{baris / blok 3}}` → {{kasus khusus / alasan desain / kompatibilitas}}
+
+<!-- Ulangi ### Bagian 2, 3, ... untuk semua method/fungsi/blok logika lain di file ini -->
 
 ---
 

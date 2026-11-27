@@ -111,12 +111,15 @@ Kamu **sangat dianjurkan menambah bagian ekstra** bila membuat pembaca lebih pah
 - `## ⚖️ Kapan Pakai X vs Y?` (mis. `AppAlert` vs `AppToast`, `AppButton.filled` vs `AppButton.tonal`)
 - `## 🚨 Yang Terjadi Kalau Ada Error / Edge Case` (mis. token expired, koneksi putus, list kosong, layar tablet)
 
-### 2.2 Aturan Kedalaman (ANTI-DANGKAL — WAJIB KUTIP & BEDAH KODE ASLI!)
+### 2.2 Aturan Kedalaman (WAJIB BEDAH KODE ASLI UNTUK SELURUH CODEBASE!)
 
-- **DILARANG** hanya merangkum secara abstrak atau memadatkan banyak komponen/class ke dalam 1 tabel 1-baris!
-- **WAJIB Kutip Kode Asli + Jelaskan Baris demi Baris / Blok demi Blok:**
-  Untuk setiap fungsi kunci, entry point (`main()`, router, interceptor, method inti, `build()` komponen, endpoint), **kutip potongan kode aslinya** langsung dari file sumber (sekitar 8–40 baris yang paling penting — persis dari kode, jangan mengarang!), lalu **bedah baris demi baris / blok demi blok** tepat di bawahnya: jelaskan **apa yang dilakukan** DAN **kenapa ditulis begitu** (urutan eksekusi, alasan pakai `unawaited`/async, `if/else`, fallback, dll.).
-  - Contoh format yang bagus:
+- **DILARANG** hanya merangkum secara abstrak, memadatkan banyak komponen/class ke dalam 1 tabel 1-baris, atau hanya mengutip `main()` / 1–2 file contoh saja!
+- **BERLAKU UNTUK SEMUA FILE SOURCE DI SELURUH CODEBASE:**
+  **Setiap file** di setiap folder yang didokumentasikan — baik entry point, router, screen/page, reusable widget/component, cubit/bloc/store, service, controller, repository, datasource, interceptor/middleware, model/DTO, validator, helper, hingga konfigurasi/theme — **WAJIB menampilkan potongan kode aslinya** langsung dari file sumber, lalu **membedahnya baris demi baris / blok demi blok** tepat di bawahnya (jelaskan **apa yang dilakukan** DAN **kenapa ditulis begitu**).
+  - **File pendek–sedang (≤ 120 baris):** tampilkan seluruh kode pentingnya (bisa dipecah per fungsi/method/blok logis) dan jelaskan tiap baris/bloknya.
+  - **File besar (> 120 baris):** pecah per bagian nyata di dalam file (constructor/props → setiap method/handler → percabangan `if/else` & error handling → `build()`/`render()`) dan kutip kode asli tiap bagiannya agar **seluruh logika file benar-benar terjawab**, bukan cuma garis besar.
+  - **Satu-satunya yang boleh disingkat:** file auto-generated (`*.g.dart`, `*.freezed.dart`, `*.pb.go`) atau barrel file re-export murni (`export '...';`).
+  - *Contoh format (hanya ilustrasi gaya — terapkan pola kutip + bedah seperti ini ke SEMUA file di codebase, bukan hanya `main()`):*
     ````markdown
     ```dart
     Future<void> main() async {
@@ -141,9 +144,8 @@ Kamu **sangat dianjurkan menambah bagian ekstra** bila membuat pembaca lebih pah
     - `runApp(...)` → Menampilkan aplikasi ke layar.
     - `unawaited(dependencies.authCubit.bootstrap())` → Sambil layar tampil, cek sesi/token login di belakang layar.
     ````
-  - Untuk file panjang (> 50 baris), kutip **bagian-bagian kuncinya** saja (jangan dump 300 baris mentah sekaligus tanpa penjelasan).
-- **Folder dengan 1–5 komponen/class/file penting:** tulis di `docs/<path-folder>/README.md`; masing-masing WAJIB punya sub-judul `###` sendiri yang lengkap (analogi natural + **potongan kode asli + bedah baris demi baris** + daftar lengkap props/method + lokasi pemakaian + contoh pakai).
-- **Folder dengan > 5 komponen reusable / class penting** (mis. `shared/widgets/`, `components/ui/`, `services/`): buat **halaman detail terpisah** `docs/<path-folder>/<nama>.md` menggunakan `SKILL_DIR/templates/component-doc-template.md`, lalu tautkan dari `docs/<path-folder>/README.md` dan `docs/_sidebar.md`.
+- **Folder dengan 1–5 file/komponen/class:** tulis di `docs/<path-folder>/README.md`; **setiap file/komponen/class** WAJIB punya sub-judul `###` sendiri yang lengkap (penjelasan natural + **kutipan kode asli per bagian + bedah baris demi baris** + daftar lengkap props/method + lokasi pemakaian + contoh pakai).
+- **Folder dengan > 5 file/komponen/class** (mis. `shared/widgets/`, `components/ui/`, `services/`, `pages/`): buat **halaman detail terpisah** `docs/<path-folder>/<nama>.md` untuk **setiap file/komponen** menggunakan `SKILL_DIR/templates/component-doc-template.md`, lalu tautkan semuanya dari `docs/<path-folder>/README.md` dan `docs/_sidebar.md`.
 - **Wajib sertakan "Dipakai di Mana Saja"** untuk setiap reusable component/widget/service/helper dengan mencari pemakaian nyatanya lewat `rg -l` / `grep -rl` (mis. *"Dipakai di 14 file, antara lain: `login_screen.dart`, `register_screen.dart`, `checkout_page.dart`"*).
 
 ### 2.3 Aturan Gaya Bahasa Natural & ELI5 (WAJIB)
