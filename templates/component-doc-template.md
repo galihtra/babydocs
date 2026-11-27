@@ -15,7 +15,7 @@
 <!-- OPSIONAL (WAJIB untuk komponen UI): screenshot ter-crop ke komponennya saja, tampilkan variasi utama -->
 ## Tampilan
 
-![Tampilan {{NAMA_KOMPONEN_ATAU_CLASS}}](./assets/{{nama-komponen}}.png)
+![Tampilan {{NAMA_KOMPONEN_ATAU_CLASS}}](/assets/{{path-folder}}/{{nama-komponen}}.png)
 
 *{{Varian/keadaan yang tampil di gambar, mis. filled, tonal, outlined, text, loading, disabled.}}*
 

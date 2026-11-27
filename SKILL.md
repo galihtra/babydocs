@@ -13,11 +13,13 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
 
 ## Aturan Global (WAJIB, berlaku di semua fase)
 
-1. **JANGAN mengubah source code proyek.** File yang BOLEH kamu buat/ubah hanya:
-   - `README.md` (root & sub-folder) dan halaman detail `<nama>.md` (mis. `tech-stack.md`, `app_button.md`)
-   - `assets/` di dalam folder yang didokumentasikan (hanya berisi gambar `.png`)
-   - `_sidebar.md`, `index.html` / `docs.html`, `.nojekyll` di root proyek
-   - File sementara untuk screenshot (lihat Fase 2.4) — **wajib dihapus** setelah selesai.
+1. **JANGAN mengubah atau mengotori folder source code proyek!**
+   - **SEMUA** hasil dokumentasi dan gambar disimpan terpisah di dalam **`PROJECT_ROOT/docs/`**:
+     - `docs/README.md`, `docs/tech-stack.md`, `docs/_sidebar.md`, `docs/index.html`, `docs/.nojekyll`
+     - Halaman per folder: `docs/<path-folder>/README.md` dan halaman detail komponen `docs/<path-folder>/<nama>.md`
+     - Semua screenshot: `docs/assets/<path-folder>/<nama>.png`
+   - **JANGAN** menaruh `README.md`, `*.md`, atau `assets/*.png` di dalam folder source code (`src/`, `lib/`, `app/`, dll.) dan **JANGAN** menimpa `README.md` atau `index.html` di root proyek!
+   - File sementara untuk screenshot (`.babydocs-shot.mjs`, `test/babydocs_shots/`) **wajib dihapus** setelah selesai.
 2. **JANGAN mengarang.** Setiap nama file, class, komponen, method, props, default value, route, dan lokasi pemakaian **harus berasal dari kode yang benar-benar kamu baca**. Jika ragu, baca file-nya dulu.
 3. **Hormati README yang sudah ada.** Jika sebuah `README.md` sudah ada:
    - Jika berisi penanda `<!-- babydocs:start -->` … `<!-- babydocs:end -->` → ganti **hanya** isi di antara penanda.
@@ -112,8 +114,8 @@ Kamu **sangat dianjurkan menambah bagian ekstra** bila membuat pembaca lebih pah
 ### 2.2 Aturan Kedalaman (ANTI-DANGKAL)
 
 - **DILARANG** memadatkan banyak komponen/class ke dalam 1 tabel ringkasan 1-baris saja!
-- **Folder dengan 1–5 komponen/class/file penting:** masing-masing WAJIB punya sub-judul `###` sendiri yang lengkap di `README.md` (analogi natural + alur internal kode langkah demi langkah + daftar lengkap props/method + lokasi pemakaian + contoh pakai).
-- **Folder dengan > 5 komponen reusable / class penting** (mis. `shared/widgets/`, `components/ui/`, `services/`): buat **halaman detail terpisah** `<nama>.md` di folder tersebut menggunakan `SKILL_DIR/templates/component-doc-template.md`, lalu tautkan dari `README.md` folder dan `_sidebar.md`.
+- **Folder dengan 1–5 komponen/class/file penting:** tulis di `docs/<path-folder>/README.md`; masing-masing WAJIB punya sub-judul `###` sendiri yang lengkap (analogi natural + alur internal kode langkah demi langkah + daftar lengkap props/method + lokasi pemakaian + contoh pakai).
+- **Folder dengan > 5 komponen reusable / class penting** (mis. `shared/widgets/`, `components/ui/`, `services/`): buat **halaman detail terpisah** `docs/<path-folder>/<nama>.md` menggunakan `SKILL_DIR/templates/component-doc-template.md`, lalu tautkan dari `docs/<path-folder>/README.md` dan `docs/_sidebar.md`.
 - **Wajib sertakan "Dipakai di Mana Saja"** untuk setiap reusable component/widget/service/helper dengan mencari pemakaian nyatanya lewat `rg -l` / `grep -rl` (mis. *"Dipakai di 14 file, antara lain: `login_screen.dart`, `register_screen.dart`, `checkout_page.dart`"*).
 
 ### 2.3 Aturan Gaya Bahasa Natural & ELI5 (WAJIB)
@@ -195,7 +197,7 @@ Tulis seperti **senior developer yang ramah lagi ngobrol santai** menjelaskan ko
     });
   }
   ```
-  Jalankan `flutter test --update-goldens test/babydocs_shots/`, salin `test/babydocs_shots/goldens/*.png` → `<FolderDok>/assets/`, lalu **hapus seluruh `test/babydocs_shots/`**.
+  Jalankan `flutter test --update-goldens test/babydocs_shots/`, salin `test/babydocs_shots/goldens/*.png` → `PROJECT_ROOT/docs/assets/<path-folder>/`, lalu **hapus seluruh `test/babydocs_shots/`**. Embed gambar di Markdown dengan path relatif ke `docs/assets/...` (atau `/assets/<path-folder>/<nama>.png`).
 - **Android / iOS / RN / MAUI:** gunakan snapshot test (`Paparazzi`/`Roborazzi`/`swift-snapshot-testing`) jika tersedia, atau web target (`expo start --web` + Playwright), atau simulator (`xcrun simctl io booted screenshot` / `adb exec-out screencap -p`; di macOS boleh `xcrun simctl boot <UDID>` bila belum booted, lalu matikan setelah selesai).
 - **Fallback (2.5)** HANYA jika capture benar-benar sudah dicoba di terminal dan gagal; wajib cantumkan error nyata dari terminal.
 
@@ -220,28 +222,28 @@ Jika eksekusi capture sudah dicoba (maks. 2 percobaan) dan tetap gagal, tulis ca
 
 ## Fase 3 — Web Dokumentasi Induk
 
-### 3.1 `README.md` root (halaman depan) & `tech-stack.md`
+### 3.1 `docs/README.md` (halaman depan) & `docs/tech-stack.md`
 
-Gunakan `SKILL_DIR/templates/root-readme-template.md` sebagai acuan (tetap fleksibel). Halaman depan WAJIB menjawab pertanyaan orang awam & developer baru:
+Gunakan `SKILL_DIR/templates/root-readme-template.md` sebagai acuan (tetap fleksibel). Tulis di `PROJECT_ROOT/docs/README.md` (JANGAN menimpa `README.md` milik proyek di root!). Halaman depan WAJIB menjawab pertanyaan orang awam & developer baru:
 1. **Ini proyek apa?** (penjelasan singkat & natural).
 2. **Kenapa pakai arsitektur ini?** — jelaskan pola arsitektur proyek (mis. Feature-First Clean Architecture / Modular Monolith / MVC), analoginya, dan **alasan kenapa dipisah seperti itu** (apa untungnya, bukan sekadar daftar folder).
 3. **Diagram arsitektur** (`flowchart LR`) yang menunjukkan aliran data antar lapisan utama.
-4. **Library & Package Utama (+ perbandingan pesaing)** — tampilkan ringkasan di root atau buat halaman khusus `tech-stack.md` (tautkan di sidebar!) berisi: package, perannya, dipakai di mana, alternatif/pesaingnya, serta kelebihan & kekurangannya.
-5. **Peta Navigasi** ke semua area utama.
+4. **Library & Package Utama (+ perbandingan pesaing)** — tampilkan ringkasan di `docs/README.md` atau buat halaman khusus `docs/tech-stack.md` (tautkan di `docs/_sidebar.md`!) berisi: package, perannya, dipakai di mana, alternatif/pesaingnya, serta kelebihan & kekurangannya.
+5. **Peta Navigasi** ke semua area utama (tautan relatif di dalam `docs/`, mis. `lib/shared/widgets/README.md`).
 6. **Cara menjalankan proyek** & **cara membuka dokumentasi** (`babydocs serve --open`).
 
-### 3.2 `_sidebar.md` di root
+### 3.2 `docs/_sidebar.md`
 
 Gunakan `SKILL_DIR/templates/_sidebar-template.md` sebagai acuan:
 - Baris pertama: `- [Beranda](/)` (atau dengan 1 ikon rapi).
-- Jika membuat `tech-stack.md`, tautkan di bagian atas (mis. `- [Arsitektur & Tech Stack](tech-stack.md)`).
+- Jika membuat `docs/tech-stack.md`, tautkan di bagian atas (mis. `- [Arsitektur & Tech Stack](tech-stack.md)`).
 - **Indentasi WAJIB tepat 2 spasi per level** dan **tidak pernah melompati level** (melompat dari 0 ke 4+ spasi membuat Docsify merendernya sebagai code block!). Maksimal 3 level indentasi.
-- Path relatif dari root tanpa `./` di depan. Setiap `README.md` dan `<komponen>.md` yang dibuat harus muncul di sidebar.
+- Path relatif dari dalam `docs/` tanpa `./` di depan (mis. `lib/shared/widgets/README.md`). Setiap `README.md` dan `<komponen>.md` di dalam `docs/` harus muncul di sidebar.
 - Gunakan label yang natural (mis. `Shared Widgets`, `Network & API`, `Auth`, bukan terjemahan kaku seperti `Widget Bersama`).
 
-### 3.3 `index.html` dan `.nojekyll`
+### 3.3 `docs/index.html` dan `docs/.nojekyll`
 
-Jalankan `"SKILL_DIR/bin/babydocs" init "PROJECT_ROOT"` (otomatis mengisi nama proyek, URL repo, memakai `docs.html` jika `index.html` milik aplikasi sudah ada, dan membuat `.nojekyll`).
+Jalankan `"SKILL_DIR/bin/babydocs" init "PROJECT_ROOT"` — otomatis membuat folder `docs/` dan `docs/assets/`, memasang `docs/index.html` dengan nama proyek & URL repo, serta membuat `docs/.nojekyll` (siap langsung publish ke GitHub Pages via **Settings → Pages → folder `/docs`**).
 
 ### 3.4 Cara preview (tulis di README root & laporan)
 

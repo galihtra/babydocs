@@ -120,14 +120,28 @@ def find_entry(root: Path) -> str:
     return ""
 
 
+def resolve_docs_dir(path: Path) -> tuple[Path, Path]:
+    """Kembalikan (docs_dir, project_root). Otomatis deteksi subfolder docs/."""
+    p = path.resolve()
+    sub = p / "docs"
+    if find_entry(sub):
+        return sub, p
+    if find_entry(p):
+        return p, (p.parent if p.name == "docs" else p)
+    if sub.is_dir() and any(sub.glob("*.md")):
+        return sub, p
+    return p, (p.parent if p.name == "docs" else p)
+
+
 def cmd_serve(a) -> int:
-    root = Path(a.dir).resolve()
-    if not root.is_dir():
-        print(c("31", f"✗ Folder tidak ditemukan: {root}"))
+    raw = Path(a.dir).resolve()
+    if not raw.is_dir():
+        print(c("31", f"✗ Folder tidak ditemukan: {raw}"))
         return 1
+    root, _ = resolve_docs_dir(raw)
     entry = find_entry(root)
     if not entry:
-        print(c("31", "✗ Dokumentasi belum dipasang di folder ini."))
+        print(c("31", "✗ Dokumentasi belum dipasang di folder ini (atau di folder docs/)."))
         print(f"  Jalankan dulu: {c('1', 'babydocs init')}  (atau minta agent menjalankan skill babydocs)")
         return 1
     port = a.port
@@ -217,20 +231,28 @@ def repo_url(root: Path) -> str:
 
 
 def cmd_init(a) -> int:
-    root = Path(a.dir).resolve()
+    raw = Path(a.dir).resolve()
+    if a.root or raw.name == "docs":
+        docs_dir = raw
+        proj_root = raw.parent if raw.name == "docs" else raw
+    else:
+        proj_root = raw
+        docs_dir = raw / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    (docs_dir / "assets").mkdir(exist_ok=True)
     html = (TEMPLATES / "index.html").read_text(encoding="utf-8")
-    html = html.replace("{{PROJECT_NAME}}", a.name or project_name(root))
-    url = repo_url(root)
+    html = html.replace("{{PROJECT_NAME}}", a.name or project_name(proj_root))
+    url = repo_url(proj_root)
     html = html.replace("{{REPO_URL}}", url) if url else re.sub(r'\n\s*repo: "\{\{REPO_URL\}\}",', "", html)
-    target = root / "index.html"
+    target = docs_dir / "index.html"
     if target.exists() and MARK not in target.read_text(encoding="utf-8", errors="ignore")[:2000]:
-        target = root / "docs.html"
+        target = docs_dir / "docs.html"
         print(c("33", "  index.html milik aplikasi sudah ada → memakai docs.html"))
     target.write_text(html, encoding="utf-8")
-    (root / ".nojekyll").touch()
-    print(c("32", f"✓ {target.name} dan .nojekyll terpasang di {root}"))
-    if not (root / "README.md").exists():
-        print(c("33", "  README.md belum ada — jalankan skill babydocs lewat agent untuk mengisinya."))
+    (docs_dir / ".nojekyll").touch()
+    print(c("32", f"✓ {target.name}, .nojekyll, dan folder assets/ terpasang di {docs_dir}"))
+    if not (docs_dir / "README.md").exists():
+        print(c("33", "  docs/README.md belum ada — jalankan skill babydocs lewat agent untuk mengisinya."))
     return 0
 
 
@@ -242,17 +264,19 @@ IMG_RE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)")
 
 
 def cmd_check(a) -> int:
-    root = Path(a.dir).resolve()
+    raw = Path(a.dir).resolve()
+    root, proj_root = resolve_docs_dir(raw)
     problems: list[str] = []
-    readmes = []
+    md_files = []
     for dp, dns, fns in os.walk(root):
         dns[:] = [d for d in dns if d not in SKIP_DIRS and not d.startswith(".")]
-        if "README.md" in fns:
-            readmes.append(Path(dp) / "README.md")
-    targets = readmes + [p for p in (root / "_sidebar.md", root / "index.html", root / "docs.html") if p.exists()]
+        for fn in sorted(fns):
+            if fn.endswith(".md") and fn != "_sidebar.md":
+                md_files.append(Path(dp) / fn)
+    targets = md_files + [p for p in (root / "_sidebar.md", root / "index.html", root / "docs.html") if p.exists()]
     for p in targets:
         txt = p.read_text(encoding="utf-8", errors="ignore")
-        if "babydocs:start" not in txt and p.name == "README.md":
+        if "babydocs:start" not in txt and p.suffix == ".md" and p.name != "_sidebar.md":
             continue
         rel = p.relative_to(root)
         if "{{" in txt:
@@ -261,7 +285,9 @@ def cmd_check(a) -> int:
             for img in IMG_RE.findall(txt):
                 if img.startswith(("http://", "https://", "data:")):
                     continue
-                if not (p.parent / img.split("#")[0]).exists():
+                clean = img.split("#")[0]
+                img_path = (root / clean.lstrip("/")) if clean.startswith("/") else (p.parent / clean)
+                if not img_path.exists():
                     problems.append(f"gambar hilang: {rel} → {img}")
     sb = root / "_sidebar.md"
     if not sb.exists():
@@ -287,15 +313,16 @@ def cmd_check(a) -> int:
             path = root / link.lstrip("/")
             if not (path.exists() or (path / "README.md").exists() or path.with_suffix(".md").exists()):
                 problems.append(f"link sidebar rusak: {link}")
-    # Cek boilerplate / kualitas dasar di README hasil babydocs
+    # Cek boilerplate / kualitas dasar di file markdown hasil babydocs
     boilerplate_re = re.compile(r"(Menangani bagian |Berkas langsung|ruang kerja khusus dalam sebuah sekolah)")
-    is_flutter = (root / "pubspec.yaml").exists() and "flutter:" in (root / "pubspec.yaml").read_text(
-        encoding="utf-8", errors="ignore"
-    )
-    for p in readmes:
+    pubspec = proj_root / "pubspec.yaml"
+    is_flutter = pubspec.exists() and "flutter:" in pubspec.read_text(encoding="utf-8", errors="ignore")
+    checked_md = 0
+    for p in md_files:
         txt = p.read_text(encoding="utf-8", errors="ignore")
         if "babydocs:start" not in txt:
             continue
+        checked_md += 1
         rel = p.relative_to(root)
         if boilerplate_re.search(txt):
             problems.append(f"terdeteksi teks boilerplate generik: {rel}")
@@ -324,14 +351,14 @@ def cmd_check(a) -> int:
     if not (root / ".nojekyll").exists():
         problems.append(".nojekyll tidak ada (dibutuhkan GitHub Pages)")
     for leftover in (".babydocs-shot.mjs", "test/babydocs_shots"):
-        if (root / leftover).exists():
+        if (proj_root / leftover).exists():
             problems.append(f"file sementara belum dihapus: {leftover}")
     if problems:
         print(c("31", f"✗ {len(problems)} masalah:"))
         for x in problems:
             print("  - " + x)
         return 1
-    print(c("32", f"✓ Semua beres ({len(readmes)} README dicek)"))
+    print(c("32", f"✓ Semua beres ({checked_md} halaman dicek di {root})"))
     return 0
 
 
@@ -372,9 +399,10 @@ def main() -> int:
     s.add_argument("--host", default="127.0.0.1", help="pakai 0.0.0.0 agar bisa dibuka dari HP di jaringan sama")
     s.add_argument("-o", "--open", action="store_true", help="langsung buka browser")
     s.add_argument("--no-reload", action="store_true", help="matikan live reload")
-    i = sub.add_parser("init", help="pasang index.html + .nojekyll")
+    i = sub.add_parser("init", help="pasang docs/index.html + .nojekyll + docs/assets/")
     i.add_argument("dir", nargs="?", default=".")
     i.add_argument("--name", default="")
+    i.add_argument("--root", action="store_true", help="pasang langsung di root, bukan di subfolder docs/")
     k = sub.add_parser("check", help="cek link, gambar, placeholder")
     k.add_argument("dir", nargs="?", default=".")
     sub.add_parser("scan", help="buat Peta Proyek (lihat: babydocs scan --help)")

@@ -55,9 +55,9 @@ cd /path/to/your-project
 babydocs serve --open
 ```
 
-The local server runs on `http://localhost:3000` with live reload. If your project already has its own `index.html`, `babydocs` writes `docs.html` instead and serves that automatically.
+The local server automatically serves the generated `docs/` folder on `http://localhost:3000` with live reload, keeping your source directories (`src/`, `lib/`, etc.) completely clean.
 
-To publish on GitHub Pages, commit the generated files (`index.html`, `_sidebar.md`, `.nojekyll`, `README.md`, `assets/`) and enable **Settings → Pages → Deploy from a branch → `/ (root)`**.
+To publish on GitHub Pages, commit the `docs/` folder and enable **Settings → Pages → Deploy from a branch → `/docs`**.
 
 ## CLI commands
 

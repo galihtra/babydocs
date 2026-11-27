@@ -27,7 +27,7 @@
 <!-- OPSIONAL: tampilkan jika ada screenshot (crop komponen untuk reusable UI, full page untuk screen) -->
 ## Tampilan
 
-![{{Deskripsi gambar}}](./assets/{{nama-gambar}}.png)
+![{{Deskripsi gambar}}](/assets/{{path-folder}}/{{nama-gambar}}.png)
 
 *{{Keterangan singkat apa yang tampil di gambar.}}*
 
@@ -56,7 +56,7 @@ flowchart TD
 > 🔧 **Di kode:** `{{nama_file.ext}}` → `{{deklarasi asli}}`
 
 <!-- OPSIONAL: screenshot crop khusus komponen ini -->
-![Tampilan {{NamaKomponenAtauClass}}](./assets/{{nama-komponen}}.png)
+![Tampilan {{NamaKomponenAtauClass}}](/assets/{{path-folder}}/{{nama-komponen}}.png)
 
 **Dipakai di mana saja:** {{hasil pencarian rg/grep nyata, mis. "Dipakai di 9 layar: `login_screen.dart`, `register_screen.dart`, ..."}}
 

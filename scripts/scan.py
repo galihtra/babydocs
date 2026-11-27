@@ -46,7 +46,7 @@ IGNORE_DIRS = {
     ".gradle", ".expo", ".expo-shared", "venv", ".venv", "env",
     "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".tox",
     "site-packages", "vendor", "Carthage", "DerivedData", ".terraform",
-    "tmp", "temp", "logs", "assets", ".babydocs",
+    "tmp", "temp", "logs", "assets", ".babydocs", "docs",
 }
 IGNORE_FILE_RE = re.compile(
     r"(\.min\.(js|css)$|\.map$|\.lock$|-lock\.(json|yaml)$|\.g\.dart$|"
@@ -457,7 +457,9 @@ def main() -> int:
             except OSError:
                 pass
         digest = h.hexdigest()[:12]
-        readme = root / d / "README.md"
+        readme = root / "docs" / d / "README.md"
+        if not readme.exists():
+            readme = root / d / "README.md"
         old = HASH_RE.search(read(readme, 20_000)) if readme.exists() else None
         status = "new" if not readme.exists() else ("unchanged" if old and old.group(1) == digest else "changed")
         name = d.split("/")[-1].lower()
