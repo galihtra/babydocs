@@ -1,119 +1,110 @@
 <!-- babydocs:start -->
 <!-- babydocs:hash={{HASH_FOLDER_DARI_PETA_PROYEK}} -->
 <!--
-  TEMPLATE README SUB-FOLDER (MENDALAM: LEVEL KOMPONEN / CLASS / FUNGSI / ALUR KODE)
-  - Jika folder berisi 1–5 komponen/file: bedah SEMUANYA secara detail di bagian "## 🧩 Bedah Komponen, Class & Fungsi" (setiap komponen/class WAJIB punya sub-judul ### sendiri, DILARANG diringkas jadi 1 tabel 1-baris!).
-  - Jika folder berisi > 5 komponen reusable/file kompleks: buat halaman detail terpisah (<nama>.md memakai templates/component-doc-template.md) untuk tiap komponen/file, lalu tautkan dari sini dan dari _sidebar.md.
-  - Hapus komentar petunjuk ini sebelum menyimpan, KECUALI penanda babydocs:start / babydocs:hash / babydocs:end.
+  KOTAK BAHAN (BUILDING BLOCKS) README SUB-FOLDER — FLEKSIBEL, JANGAN PUKUL RATA!
+  - Pilih HANYA bagian yang relevan untuk jenis folder ini. Hapus bagian yang tidak perlu (mis. skip diagram jika folder cuma kumpulan komponen independen/konstanta).
+  - Boleh menambah bagian ekstra seperti "Kenapa Dibuat Seperti Ini?", "Kapan Pakai A vs B?", atau "Penanganan Error & Edge Case".
+  - Pakai bahasa Indonesia yang santai & natural (hindari terjemahan kaku seperti "Widget Bersama" atau "Berkas").
+  - Jika folder berisi > 5 komponen reusable/class penting, buat halaman detail terpisah (<nama>.md) dan tautkan dari sini & _sidebar.md.
 -->
 
-# {{EMOJI}} {{NAMA_FOLDER_RAMAH}}
+# {{NAMA_FOLDER_NATURAL}}
 
-> **Singkatnya:** {{SATU_KALIMAT_ELI5_SPESIFIK — jelaskan peran nyata folder ini}}
+> {{SATU_KALIMAT_JELAS — peran nyata folder ini}}
 
-📁 Lokasi: `{{PATH_FOLDER_DARI_ROOT}}` · 🧩 Tipe: `{{web-ui | mobile-ui | backend-api | cli-library}}`
-
----
-
-## 🪆 Penjelasan Super Sederhana
-
-{{ANALOGI_BESAR — 3 s.d. 6 kalimat pendek yang spesifik terhadap perilaku kode di folder ini.}}
-
-> 🔧 **Aslinya:** {{RINGKASAN_TEKNIS — sebutkan class/komponen/entry utama dan cara folder ini dipakai.}}
+📁 `{{PATH_FOLDER_DARI_ROOT}}` · `{{web-ui | mobile-ui | backend-api | cli-library}}`
 
 ---
 
-## 👀 Lihat Wujudnya
+## Gambaran Singkat
 
-<!-- [A] UNTUK web-ui / mobile-ui: WAJIB Screenshot nyata hasil capture (Playwright / golden test / simulator) -->
-### 📸 Screenshot
+{{2–5 kalimat santai (dengan analogi jika membantu) menjelaskan cara kerja folder ini secara keseluruhan.}}
 
-![{{Deskripsi sederhana isi gambar}}](./assets/{{nama-gambar}}.png)
+> 🔧 **Di kode:** {{entry/class/komponen utama dan hubungannya dengan bagian lain}}
 
-*{{Keterangan: komponen/halaman dan varian apa saja yang tampil di gambar.}}*
+---
 
-<!-- [B] DIAGRAM ALUR NYATA (wajib pakai nama class/method/state asli, minimal 3 node bermakna) -->
-### 🗺️ Diagram Alur
+<!-- OPSIONAL: tampilkan jika ada screenshot (crop komponen untuk reusable UI, full page untuk screen) -->
+## Tampilan
+
+![{{Deskripsi gambar}}](./assets/{{nama-gambar}}.png)
+
+*{{Keterangan singkat apa yang tampil di gambar.}}*
+
+---
+
+<!-- OPSIONAL: HANYA buat diagram jika benar-benar ada alur multi-langkah / state / interaksi nyata. HAPUS jika tidak perlu! -->
+## Alur Kerja
 
 ```mermaid
 flowchart TD
-    req["Permintaan masuk ({{NamaEntry}})"] --> proc["{{Langkah nyata 1}} ({{namaMethod1}})"]
-    proc --> cek{"{{Kondisi nyata}}?"}
-    cek -- "Ya" --> ok["{{Hasil sukses}} ({{OutputSukses}})"]
-    cek -- "Tidak" --> err["{{Hasil gagal}} ({{OutputGagal}})"]
+    masuk["{{Langkah awal nyata}} ({{SimbolAwal}})"] --> proses["{{Proses nyata}} ({{MethodProses}})"]
+    proses --> cek{"{{Kondisi nyata}}?"}
+    cek -- "Ya" --> ok["{{Hasil sukses}} ({{OutputOk}})"]
+    cek -- "Tidak" --> gagal["{{Hasil gagal}} ({{OutputGagal}})"]
 ```
 
 ---
 
-## 🧩 Bedah Komponen, Class & Fungsi
+<!-- WAJIB untuk folder yang punya komponen/class/fungsi: bedah satu per satu, ATAU tautkan ke halaman detail ./<nama>.md -->
+## Bedah Komponen, Class & Fungsi
 
-<!--
-  ATURAN WAJIB:
-  - JANGAN ringkas banyak komponen menjadi 1 tabel 1-baris!
-  - Setiap komponen/class/service penting HARUS punya sub-judul ### sendiri di bawah ini
-    ATAU punya halaman detail terpisah (<nama>.md) yang ditautkan dari tabel katalog.
--->
+### 1. `{{NamaKomponenAtauClass}}`
 
-### 1. `{{NamaClassAtauKomponen}}`
+{{Penjelasan santai + analogi bila membantu.}}
 
-{{2–3 kalimat analogi ELI5 yang menjelaskan persis tugasnya.}}
+> 🔧 **Di kode:** `{{nama_file.ext}}` → `{{deklarasi asli}}`
 
-> 🔧 **Aslinya:** `{{nama_file.ext}}` → `{{deklarasi asli}}`
+<!-- OPSIONAL: screenshot crop khusus komponen ini -->
+![Tampilan {{NamaKomponenAtauClass}}](./assets/{{nama-komponen}}.png)
 
-<!-- Jika punya screenshot khusus komponen ini: -->
-![Tampilan {{NamaClassAtauKomponen}}](./assets/{{nama-komponen}}.png)
+**Dipakai di mana saja:** {{hasil pencarian rg/grep nyata, mis. "Dipakai di 9 layar: `login_screen.dart`, `register_screen.dart`, ..."}}
 
 **Cara kerja di dalam kode:**
-1. {{Langkah 1 sesuai alur if/else / build / logic nyata di file}} (`{{simbol/kondisi}}`)
-2. {{Langkah 2 — kasus khusus seperti loading, disabled, error, retry, fallback}} (`{{simbol/kondisi}}`)
+1. {{Alur nyata langkah 1}} (`{{kondisi/method}}`)
+2. {{Alur nyata langkah 2 — termasuk kasus khusus seperti loading, disabled, error, fallback}} (`{{kondisi/method}}`)
 
-**Props / Parameter Lengkap:**
+**Props / Parameter:**
 
-| Nama | Tipe | Default / Wajib | Artinya (bahasa sederhana) |
+| Nama | Tipe | Default / Wajib | Fungsinya |
 |---|---|---|---|
 | `{{prop1}}` | `{{String}}` | **Wajib** | {{penjelasan singkat}} |
-| `{{prop2}}` | `{{bool}}` | `false` | {{apa efeknya jika true}} |
 
-**Method / Aksi Lengkap:**
+**Method / Aksi:**
 
-| Method | Input | Output / Efek | Cara Kerjanya (bahasa sederhana) |
+| Method | Input | Output / Efek | Cara Kerjanya |
 |---|---|---|---|
-| `{{methodA(param)}}` | `{{param: Tipe}}` | `{{Return / emit State / HTTP call}}` | {{apa yang dilakukan langkah demi langkah}} |
+| `{{methodA(x)}}` | `{{x: Tipe}}` | `{{Return / state / API call}}` | {{penjelasan singkat}} |
 
-**Contoh Pemakaian:**
+**Contoh pakai:**
 
 ```{{bahasa}}
-{{CONTOH_NYATA_SIAP_PAKAI}}
+{{CONTOH_NYATA}}
 ```
 
 ---
 
-### ⚙️ Fungsi Lepas & Helper
+<!-- OPSIONAL: bagian tambahan yang bikin pembaca makin paham -->
+## Kapan Pakai X vs Y?
 
-| Fungsi | File | Input | Output | Cara Kerjanya (bahasa sederhana) |
-|---|---|---|---|---|
-| `{{namaFungsi(a, b)}}` | `{{file.ext}}` | `{{a: Tipe, b: Tipe}}` | `{{TipeReturn}}` | {{penjelasan spesifik termasuk edge case}} |
+| Situasi | Pakai | Alasannya |
+|---|---|---|
+| {{kasus 1}} | `{{KomponenA}}` | {{alasan singkat}} |
+| {{kasus 2}} | `{{KomponenB}}` | {{alasan singkat}} |
 
 ---
 
-## 📋 Ringkasan File
+## Daftar File
 
-| Nama File | Isi Utama | Halaman Detail / Bagian |
+| File | Isi Utama | Detail |
 |---|---|---|
-| `{{file_1.ext}}` | `{{ClassA}}`, `{{helperB()}}` | [Lihat detail](#_1-classa) *(atau `[Lihat detail](./class_a.md)`)* |
+| `{{file_1.ext}}` | `{{ClassA}}` | [Lihat](#_1-classa) *(atau `[Lihat](./class_a.md)`)* |
 
-<!-- Hapus bagian ini jika folder tidak punya sub-folder ber-README -->
-### 📂 Sub-folder
+<!-- OPSIONAL: hapus jika tidak punya sub-folder ber-README -->
+### Sub-folder
 
-| Folder | Ibaratnya | Buka |
+| Folder | Fokusnya | Buka |
 |---|---|---|
-| `{{nama-subfolder}}` | {{ringkasan analogi 1 kalimat}} | [README]({{path/dari/root/ke/subfolder/README.md}}) |
-
----
-
-## 🔗 Berhubungan Dengan
-
-- **Dipakai oleh:** {{folder/file yang memanggil folder ini — tautkan README-nya}}
-- **Memakai:** {{folder/library yang dipanggil folder ini}}
+| `{{nama-subfolder}}` | {{ringkasan 1 kalimat}} | [Lihat]({{path/dari/root/ke/subfolder/README.md}}) |
 
 <!-- babydocs:end -->

@@ -1,84 +1,82 @@
 <!-- babydocs:start -->
 <!-- babydocs:hash={{HASH_FILE}} -->
 <!--
-  TEMPLATE HALAMAN DETAIL KOMPONEN / CLASS / FILE (dipakai saat folder berisi banyak komponen reusable atau file kompleks)
-  Ganti semua {{PLACEHOLDER}} dengan isi NYATA dari kode yang dibaca. Hapus komentar ini kecuali start/hash/end.
+  HALAMAN DETAIL KOMPONEN / CLASS / FILE (fleksibel — hapus bagian yang tidak relevan, tambah bagian ekstra bila membantu)
 -->
 
-# {{EMOJI}} `{{NAMA_KOMPONEN_ATAU_CLASS}}`
+# `{{NAMA_KOMPONEN_ATAU_CLASS}}`
 
-> **Singkatnya:** {{SATU_KALIMAT_ELI5_SPESIFIK — apa fungsinya dan kapan dipakai}}
+> {{SATU_KALIMAT_NATURAL — apa fungsinya dan kapan sebaiknya dipakai}}
 
-📁 File: `{{PATH_FILE_DARI_ROOT}}` · 🔙 Kembali ke [{{NAMA_FOLDER}}](./README.md)
-
----
-
-## 👀 Tampilan
-
-![Tampilan {{NAMA_KOMPONEN_ATAU_CLASS}} dengan variasi utamanya](./assets/{{nama-komponen}}.png)
-
-*{{Keterangan singkat: varian/keadaan apa saja yang terlihat di gambar (mis. normal, loading, disabled, error).}}*
+📁 `{{PATH_FILE_DARI_ROOT}}` · ← Kembali ke [{{NAMA_FOLDER}}](./README.md)
 
 ---
 
-## 🪆 Penjelasan Super Sederhana
+<!-- OPSIONAL (WAJIB untuk komponen UI): screenshot ter-crop ke komponennya saja, tampilkan variasi utama -->
+## Tampilan
 
-{{3–5 kalimat pendek memakai analogi sehari-hari yang menjelaskan cara kerja komponen/class ini.}}
+![Tampilan {{NAMA_KOMPONEN_ATAU_CLASS}}](./assets/{{nama-komponen}}.png)
 
-> 🔧 **Aslinya:** `{{nama_file.ext}}` → `{{deklarasi asli class/component/fungsi}}`
-
----
-
-## 🔍 Cara Kerja di Dalam Kode (Langkah demi Langkah)
-
-Jelaskan alur logika penting dari atas ke bawah kode (kondisi `if/else`, validasi, fallback, perubahan state, interaksi antar helper):
-
-1. **{{Langkah 1 — bahasa sederhana}}**
-   > 🔧 `{{namaMethod / baris/kondisi nyata di kode}}`
-2. **{{Langkah 2 — bahasa sederhana}}**
-   > 🔧 `{{namaMethod / baris/kondisi nyata di kode}}`
-3. **{{Langkah 3 — kasus khusus / error / disabled / loading}}**
-   > 🔧 `{{kondisi nyata di kode}}`
+*{{Varian/keadaan yang tampil di gambar, mis. filled, tonal, outlined, text, loading, disabled.}}*
 
 ---
 
-## 🎛️ Daftar Lengkap Props / Parameter / Constructor
+## Cara Kerjanya di Dalam Kode
 
-<!-- Sebutkan SEMUA parameter/props publik beserta tipe, nilai default, dan artinya -->
-| Parameter | Tipe | Default / Wajib | Artinya (bahasa sederhana) |
+{{2–4 kalimat pengantar yang santai, lalu uraikan alur nyata di dalam kode (if/else, validasi, state, fallback, alasan desain):}}
+
+1. **{{Alur utama}}** — {{penjelasan singkat}} (`{{method/baris logika}}`)
+2. **{{Saat loading / disabled / kosong}}** — {{penjelasan singkat}} (`{{kondisi}}`)
+3. **{{Kasus khusus / kompatibilitas / layar kecil-besar}}** — {{penjelasan singkat}} (`{{kondisi}}`)
+
+---
+
+## Dipakai di Mana Saja
+
+<!-- Hasil pencarian nyata dari rg/grep di codebase -->
+Dipakai di **{{JUMLAH}} file**, antara lain:
+- `{{path/file_1}}` — {{dipakai untuk apa}}
+- `{{path/file_2}}` — {{dipakai untuk apa}}
+
+---
+
+## Props / Parameter & Varian
+
+| Parameter | Tipe | Default / Wajib | Fungsinya |
 |---|---|---|---|
-| `{{param1}}` | `{{String}}` | **Wajib** | {{apa yang diatur oleh parameter ini}} |
-| `{{param2}}` | `{{bool}}` | `false` | {{apa yang terjadi jika diubah jadi true}} |
+| `{{param1}}` | `{{String}}` | **Wajib** | {{penjelasan}} |
+| `{{param2}}` | `{{bool}}` | `false` | {{efeknya jika true}} |
 
-<!-- Jika ada named constructor / varian / enum, sebutkan semuanya -->
+<!-- OPSIONAL: jika punya named constructor / enum varian -->
 ### Varian / Named Constructor
 
-| Varian | Kapan Dipakai (bahasa sederhana) | Perbedaan Utama |
+| Varian | Kapan Dipakai | Bedanya |
 |---|---|---|
-| `{{Komponen.varianA}}` | {{skenario pemakaian}} | {{perbedaan warna/perilaku/default}} |
+| `{{Komponen.varianA}}` | {{skenario}} | {{perbedaan utama}} |
 
 ---
 
-## ⚙️ Method & Fungsi di Dalam File Ini
+<!-- OPSIONAL: jika punya method/helper publik -->
+## Method & Fungsi
 
-| Nama | Input | Output / Efek | Cara Kerjanya (bahasa sederhana) |
+| Nama | Input | Output / Efek | Cara Kerjanya |
 |---|---|---|---|
-| `{{methodA(x)}}` | `{{x: Tipe}}` | `{{Return / efek samping}}` | {{penjelasan langkah kerjanya}} |
+| `{{methodA(x)}}` | `{{x: Tipe}}` | `{{Return / efek}}` | {{penjelasan}} |
 
 ---
 
-## 💡 Contoh Pemakaian
+## Contoh Pakai
 
-**1. Pemakaian dasar:**
+**Dasar:**
 
 ```{{bahasa}}
-{{CONTOH_DASAR_SIAP_PAKAI}}
+{{CONTOH_DASAR}}
 ```
 
-**2. Skenario khusus (mis. loading / disabled / dengan ikon / error handling):**
+**Skenario khusus (mis. loading / disabled / custom):**
 
 ```{{bahasa}}
-{{CONTOH_LANJUTAN_SIAP_PAKAI}}
+{{CONTOH_LANJUTAN}}
 ```
 
 <!-- babydocs:end -->

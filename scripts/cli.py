@@ -300,8 +300,9 @@ def cmd_check(a) -> int:
         if boilerplate_re.search(txt):
             problems.append(f"terdeteksi teks boilerplate generik: {rel}")
         # Cek apakah bagian Bedah Komponen cuma tabel 1 baris tanpa sub-judul ### atau halaman detail
-        if "## 🧩 Bedah" in txt:
-            bedah = txt.split("## 🧩 Bedah", 1)[1].split("\n## ", 1)[0]
+        bedah_m = re.search(r"^##\s+(?:🧩\s*)?Bedah\b.*$", txt, re.M)
+        if bedah_m:
+            bedah = txt[bedah_m.end():].split("\n## ", 1)[0]
             has_sub = bool(re.search(r"^###\s+", bedah, re.M))
             has_detail_links = bool(re.search(r"\]\(\./[\w-]+\.md\)", bedah))
             if not has_sub and not has_detail_links:
@@ -309,7 +310,7 @@ def cmd_check(a) -> int:
                     f"bedah terlalu dangkal (tidak ada sub-judul ### per komponen/class atau link detail .md): {rel}"
                 )
         # Cek alasan malas skip screenshot di proyek Flutter (padahal flutter test headless tersedia)
-        if is_flutter and "Tipe: `mobile-ui`" in txt and "Screenshot belum tersedia" in txt:
+        if is_flutter and "`mobile-ui`" in txt and "Screenshot belum tersedia" in txt:
             if re.search(r"simulator.*tidak aktif|emulator.*tidak tersedia", txt, re.I):
                 problems.append(
                     f"alasan skip screenshot tidak valid untuk Flutter (pakai flutter test --update-goldens tanpa simulator): {rel}"
