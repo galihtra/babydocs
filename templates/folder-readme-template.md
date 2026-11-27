@@ -1,9 +1,10 @@
-<!-- eli5-visual-docs:start -->
+<!-- babydocs:start -->
+<!-- babydocs:hash={{HASH_FOLDER_DARI_PETA_PROYEK}} -->
 <!--
   TEMPLATE README SUB-FOLDER
   - Ganti semua {{PLACEHOLDER}}.
   - Hapus bagian yang tidak relevan (mis. "Screenshot" untuk folder backend, atau "Diagram Alur" jika sudah cukup dengan screenshot).
-  - Hapus semua komentar HTML petunjuk ini sebelum menyimpan, KECUALI penanda eli5-visual-docs:start / end.
+  - Hapus semua komentar HTML petunjuk ini sebelum menyimpan, KECUALI penanda babydocs:start / babydocs:hash / babydocs:end.
 -->
 
 # {{EMOJI}} {{NAMA_FOLDER_RAMAH}}
@@ -124,4 +125,4 @@ Content-Type: application/json
 - **Dipakai oleh:** {{folder/file yang memanggil folder ini — tautkan README-nya}}
 - **Memakai:** {{folder/library yang dipanggil folder ini}}
 
-<!-- eli5-visual-docs:end -->
+<!-- babydocs:end -->

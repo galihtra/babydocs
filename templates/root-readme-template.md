@@ -1,4 +1,4 @@
-<!-- eli5-visual-docs:start -->
+<!-- babydocs:start -->
 <!--
   TEMPLATE README ROOT (halaman depan Docsify)
   Ganti semua {{PLACEHOLDER}}, hapus komentar petunjuk, pertahankan penanda start/end.
@@ -46,6 +46,6 @@ npx -y docsify-cli serve .     # buka http://localhost:3000
 python3 -m http.server 3000    # buka http://localhost:3000
 ```
 
-> Dokumentasi ini dibuat dengan **eli5-visual-docs**. Jalankan ulang skill setelah kode berubah agar tetap up-to-date.
+> Dokumentasi ini dibuat dengan **babydocs**. Jalankan ulang skill setelah kode berubah agar tetap up-to-date.
 
-<!-- eli5-visual-docs:end -->
+<!-- babydocs:end -->

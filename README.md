@@ -1,4 +1,4 @@
-# 🧸 eli5-visual-docs
+# 🧸 babydocs
 
 **Agent Skill universal** yang mengubah seluruh codebase (bahasa & framework apa pun) menjadi **web dokumentasi interaktif** ala Swagger/Docsify — dijelaskan dengan gaya **ELI5** (analogi sehari-hari, bahasa super sederhana), dilengkapi **visual otomatis**, dan terstruktur **per folder**.
 
@@ -20,9 +20,11 @@ Kode rumit  ──►  🤖 Agent + skill ini  ──►  📚 Web docs yang bis
 ## 📁 Struktur Repo
 
 ```
-eli5-visual-docs/
+babydocs/
 ├── SKILL.md                            # Instruksi utama untuk AI agent
 ├── README.md                           # File ini
+├── scripts/
+│   └── scan.py                         # Scanner cepat: stack + peta folder + kerangka kode (Python stdlib)
 └── templates/
     ├── index.html                      # Docsify (Search, Copy Code, Mermaid, Zoom)
     ├── folder-readme-template.md       # Template README per sub-folder
@@ -36,17 +38,17 @@ Skill ini mengikuti format standar **Agent Skills** (folder berisi `SKILL.md` de
 
 | Agent | Lokasi skill global | Lokasi skill per proyek |
 |---|---|---|
-| Antigravity | `~/.gemini/antigravity/skills/eli5-visual-docs/` | `<proyek>/.agents/skills/eli5-visual-docs/` |
-| Claude Code | `~/.claude/skills/eli5-visual-docs/` | `<proyek>/.claude/skills/eli5-visual-docs/` |
-| Gemini CLI | `~/.gemini/skills/eli5-visual-docs/` | `<proyek>/.gemini/skills/eli5-visual-docs/` |
-| Codex / Cursor / lainnya | Folder skill/rules agent tsb. | Atau rujuk langsung: *"ikuti instruksi di `/path/eli5-visual-docs/SKILL.md`"* |
+| Antigravity | `~/.gemini/antigravity/skills/babydocs/` | `<proyek>/.agents/skills/babydocs/` |
+| Claude Code | `~/.claude/skills/babydocs/` | `<proyek>/.claude/skills/babydocs/` |
+| Gemini CLI | `~/.gemini/skills/babydocs/` | `<proyek>/.gemini/skills/babydocs/` |
+| Codex / Cursor / lainnya | Folder skill/rules agent tsb. | Atau rujuk langsung: *"ikuti instruksi di `/path/babydocs/SKILL.md`"* |
 
 Contoh (global, via symlink agar mudah di-update):
 
 ```bash
-git clone <url-repo-ini> ~/skills/eli5-visual-docs
+git clone <url-repo-ini> ~/skills/babydocs
 mkdir -p ~/.claude/skills
-ln -s ~/skills/eli5-visual-docs ~/.claude/skills/eli5-visual-docs
+ln -s ~/skills/babydocs ~/.claude/skills/babydocs
 ```
 
 > Pastikan folder `templates/` ikut tersalin — `SKILL.md` merujuk ke sana.
@@ -56,19 +58,19 @@ ln -s ~/skills/eli5-visual-docs ~/.claude/skills/eli5-visual-docs
 Buka proyek yang ingin didokumentasikan di coding agent, lalu ketik salah satu:
 
 ```text
-/eli5-visual-docs
+/babydocs
 ```
 
 ```text
-Pakai skill eli5-visual-docs untuk mendokumentasikan seluruh codebase ini.
+Pakai skill babydocs untuk mendokumentasikan seluruh codebase ini.
 ```
 
 ```text
-Jalankan eli5-visual-docs, tapi hanya untuk folder src/features/payment.
+Jalankan babydocs, tapi hanya untuk folder src/features/payment.
 ```
 
 ```text
-Update dokumentasi eli5-visual-docs untuk perubahan sejak commit terakhir.
+Update dokumentasi babydocs untuk perubahan sejak commit terakhir.
 ```
 
 Agent akan menjalankan:
@@ -80,12 +82,29 @@ flowchart LR
     f3 --> f4["Fase 4: Verifikasi tautan, gambar, Mermaid"]
 ```
 
+## ⚡ Kenapa Cepat di Codebase Besar
+
+Agent **tidak** membuka file satu per satu. Alurnya begini:
+
+1. **Scanner satu perintah**: `scripts/scan.py` (hanya Python standard library, tidak perlu install apa-apa) menghasilkan *Peta Proyek* berisi stack, Folder Dok yang sudah diurutkan bottom-up, dan **kerangka** tiap file (class/fungsi/export, route API, import lokal, jumlah baris, tanda UI). Di proyek ±700 file / 110 ribu baris, scanner selesai dalam beberapa detik.
+2. **Baca bertingkat**: file kecil/DTO cukup dari kerangka, file sedang dibaca utuh sekali, file besar hanya bagian yang dicari dengan `grep`.
+3. **Lewati yang tidak berubah**: setiap README menyimpan `<!-- babydocs:hash=... -->`. Saat skill dijalankan ulang, folder yang hash-nya cocok langsung dilewati.
+4. **Kerja paralel**: kalau agent-mu mendukung sub-agent, tiap sub-pohon besar (mis. `src/modules/auth`) dikerjakan sub-agent terpisah secara bersamaan.
+
+Coba scanner-nya langsung:
+
+```bash
+python3 scripts/scan.py /path/ke/proyek --out /tmp/peta.md
+python3 scripts/scan.py /path/ke/proyek --only src/features --json
+```
+
 ## 🧰 Dependensi Opsional
 
 Tidak ada dependensi wajib. Visual dipilih otomatis; jika alat tidak tersedia, skill jatuh ke diagram Mermaid.
 
 | Untuk | Alat | Instalasi |
 |---|---|---|
+| Scanner cepat (disarankan) | Python 3.8+ | biasanya sudah ada di macOS/Linux |
 | Screenshot web | [Playwright](https://playwright.dev) (CLI atau MCP) | `npx playwright install chromium` |
 | Screenshot Flutter | Flutter SDK (golden test) | sudah termasuk `flutter_test` |
 | Screenshot iOS | Xcode + Simulator | `xcrun simctl` |
@@ -121,7 +140,7 @@ python3 -m http.server 3000
 
 - Tidak pernah mengubah source code — hanya `README.md`, `assets/*.png`, `_sidebar.md`, `index.html`/`docs.html`, `.nojekyll`.
 - File sementara (script screenshot, golden test) dihapus otomatis.
-- Konten buatan skill dibungkus `<!-- eli5-visual-docs:start -->` … `<!-- eli5-visual-docs:end -->`, sehingga isi README yang ditulis manusia tetap aman saat skill dijalankan ulang.
+- Konten buatan skill dibungkus `<!-- babydocs:start -->` … `<!-- babydocs:end -->`, sehingga isi README yang ditulis manusia tetap aman saat skill dijalankan ulang.
 - Kredensial asli tidak pernah dimasukkan ke dokumentasi atau screenshot.
 
 ## 📝 Lisensi

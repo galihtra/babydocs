@@ -1,6 +1,6 @@
 ---
-name: eli5-visual-docs
-description: Mengubah seluruh codebase (bahasa & framework apa pun) menjadi web dokumentasi interaktif berbasis Docsify, dijelaskan dengan gaya ELI5 (analogi sehari-hari, bahasa super sederhana), dilengkapi visual otomatis (screenshot UI via Playwright / golden test / simulator, atau diagram Mermaid untuk logika non-UI), dan terstruktur per folder (README.md di tiap folder + _sidebar.md + index.html di root). Gunakan saat user meminta "dokumentasikan codebase", "buat docs ELI5", "jelaskan proyek ini dengan bahasa sederhana", "buat dokumentasi visual", atau memanggil /eli5-visual-docs.
+name: babydocs
+description: Mengubah seluruh codebase (bahasa & framework apa pun) menjadi web dokumentasi interaktif berbasis Docsify, dijelaskan dengan gaya ELI5 (analogi sehari-hari, bahasa super sederhana), dilengkapi visual otomatis (screenshot UI via Playwright / golden test / simulator, atau diagram Mermaid untuk logika non-UI), dan terstruktur per folder (README.md di tiap folder + _sidebar.md + index.html di root). Gunakan saat user meminta "dokumentasikan codebase", "buat docs ELI5", "jelaskan proyek ini dengan bahasa sederhana", "buat dokumentasi visual", atau memanggil /babydocs.
 ---
 
 # ELI5 Visual Docs
@@ -20,7 +20,7 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
    - File sementara untuk screenshot (lihat Fase 2.4) — **wajib dihapus** setelah selesai.
 2. **JANGAN mengarang.** Setiap nama file, fungsi, class, props, endpoint, parameter, dan contoh input/output **harus berasal dari kode yang benar-benar kamu baca**. Jika ragu, baca file-nya dulu. Jika tetap tidak pasti, tulis `> ⚠️ Belum terverifikasi: ...`.
 3. **Hormati README yang sudah ada.** Jika sebuah `README.md` sudah ada:
-   - Jika berisi penanda `<!-- eli5-visual-docs:start -->` … `<!-- eli5-visual-docs:end -->` → ganti **hanya** isi di antara penanda.
+   - Jika berisi penanda `<!-- babydocs:start -->` … `<!-- babydocs:end -->` → ganti **hanya** isi di antara penanda.
    - Jika tidak ada penanda → **jangan hapus apa pun**. Tambahkan bagianmu di paling bawah, dibungkus penanda tersebut.
    - Jika file baru → bungkus seluruh konten hasil skill dengan penanda tersebut.
 4. **Lokasi template.** Semua template ada di folder `templates/` yang bersebelahan dengan file `SKILL.md` ini. Sebut path folder skill ini sebagai `SKILL_DIR`, dan root proyek user sebagai `PROJECT_ROOT`.
@@ -34,6 +34,7 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
 
 1. Tetapkan `PROJECT_ROOT` = direktori kerja saat ini (atau path yang disebut user).
 2. Tetapkan `SKILL_DIR` = folder tempat `SKILL.md` ini berada. Pastikan file berikut ada:
+   - `SKILL_DIR/scripts/scan.py`
    - `SKILL_DIR/templates/index.html`
    - `SKILL_DIR/templates/folder-readme-template.md`
    - `SKILL_DIR/templates/root-readme-template.md`
@@ -42,7 +43,41 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
 
 ---
 
+## ⚡ Strategi Membaca Cepat (WAJIB diikuti)
+
+Tujuan: memahami seluruh codebase dengan **jumlah pembacaan file seminimal mungkin**. Jangan pernah membuka file satu per satu secara acak.
+
+1. **Peta dulu, baca kemudian.** Jalankan scanner satu kali (Fase 1.0). Hasilnya sudah berisi stack, daftar Folder Dok bottom-up, dan *kerangka* tiap file (class/fungsi/export, route API, import lokal, jumlah baris, tanda UI). Untuk banyak file, kerangka ini **sudah cukup** untuk mengisi tabel Isi Penting.
+2. **Lewati yang tidak berubah.** Folder berstatus `unchanged` di Peta Proyek (hash cocok dengan penanda di README) **tidak boleh dibaca ulang** kecuali user meminta regenerasi penuh.
+3. **Baca bertingkat (3 level), berhenti sedini mungkin:**
+   - **L1 — Kerangka** (dari scanner): selalu cukup untuk file kecil (< 40 baris), DTO/model/type, barrel/index, konstanta.
+   - **L2 — Bagian penting:** untuk file 40–400 baris, baca file utuh *sekali*.
+   - **L3 — Terarah:** untuk file > 400 baris, JANGAN baca utuh. Cari dulu (`grep -n`/`rg -n`) baris signature, route, `export`, `build(`, `return (`, lalu baca hanya rentang di sekitarnya (±40 baris).
+4. **Prioritaskan file "pusat".** Per folder, baca penuh lebih dulu: entry/module/router/controller/screen/page utama, dan file yang paling sering di-import oleh file lain (lihat kolom `import` di Peta Proyek). File pendukung cukup L1.
+5. **Batch, jangan satu-satu.** Dalam satu giliran, baca semua file yang dibutuhkan satu folder secara paralel. Untuk L3, gabungkan beberapa pencarian dalam satu perintah, mis. `rg -n "export |@Get|@Post|class " src/modules/auth`.
+6. **Bagi kerja ke sub-agent (jika agent-mu mendukung).** Jika Folder Dok > 15 atau total baris > 20.000:
+   - Pecah per **sub-pohon level teratas** (mis. `src/modules/auth`, `src/modules/tryout`, `lib/features/courses`). Satu sub-agent per sub-pohon, jalankan paralel.
+   - Beri tiap sub-agent: path `SKILL.md` ini, potongan Peta Proyek untuk sub-pohonnya, tipe proyek, dan dunia analogi yang sudah dipakai (agar tidak bentrok).
+   - Sub-agent mengerjakan Fase 2 untuk sub-pohonnya saja (bottom-up) dan melapor: daftar README yang ditulis, screenshot, dan ringkasan 1 kalimat per folder.
+   - Agent utama mengerjakan README folder induk lintas sub-pohon, Fase 3, dan Fase 4. Screenshot web/mobile tetap dikoordinasi agent utama (satu dev server untuk semua) agar tidak bentrok port.
+7. **Jangan baca ulang.** Simpan ringkasan setiap folder (1 kalimat + export utama) di catatan kerjamu. README folder induk ditulis dari ringkasan anak, bukan dengan membaca ulang file anak.
+
+---
+
 ## Fase 1 — Auto-Detect Stack & Mapping
+
+### 1.0 Jalankan scanner (langkah pertama, satu perintah)
+
+```bash
+python3 "SKILL_DIR/scripts/scan.py" "PROJECT_ROOT" --out /tmp/babydocs-peta.md
+# opsional: --only src/features   (batasi ke sub-folder)
+#           --json                (output JSON untuk diproses lebih lanjut)
+```
+
+Lalu baca `/tmp/babydocs-peta.md`. File ini **bukan** bagian dari dokumentasi; jangan simpan di repo user.
+
+- Gunakan hasilnya sebagai titik awal untuk 1.2–1.5. Kamu tetap **wajib mengoreksi** hasil scanner jika keliru (scanner berbasis regex, bisa salah tebak tipe/visual).
+- Jika `python3` tidak tersedia atau scanner error, lanjutkan secara manual dengan langkah 1.1–1.5 (pakai `git ls-files` + `rg --files` untuk daftar file).
 
 ### 1.1 Daftar folder yang WAJIB DIABAIKAN
 
@@ -142,12 +177,13 @@ Proses Folder Dok **dari yang paling dalam ke paling dangkal** (bottom-up). Alas
 
 Untuk setiap Folder Dok:
 
-1. **Baca** semua file source langsung di folder tersebut (bukan hanya nama file). Untuk file > 400 baris, baca minimal: deklarasi export/public, signature fungsi/class, dan komentar dokumentasi.
+1. **Baca** file di folder tersebut mengikuti [Strategi Membaca Cepat](#-strategi-membaca-cepat-wajib-diikuti) (L1 → L2 → L3). Lewati folder berstatus `unchanged`.
 2. **Identifikasi**: tanggung jawab utama folder, export/public API, input (props, parameter, request body, argumen CLI, env var), output (render UI, return value, response, efek samping seperti tulis DB/kirim email), dan dependensi ke folder lain.
 3. **Pilih analogi** (lihat 2.3).
 4. **Buat visual** sesuai adapter (lihat 2.4).
 5. **Tulis `README.md`** dengan menyalin struktur `SKILL_DIR/templates/folder-readme-template.md`, isi semua placeholder `{{...}}`, dan **hapus** bagian template yang tidak relevan (jangan biarkan placeholder kosong tersisa).
-6. **Cek** README: tidak ada `{{` tersisa, semua gambar yang di-embed benar-benar ada di `./assets/`, semua nama file di tabel benar-benar ada.
+6. **Tulis penanda hash** tepat di bawah `<!-- babydocs:start -->`: `<!-- babydocs:hash=<hash folder dari Peta Proyek> -->`. Ini yang membuat scanner bisa melewati folder ini jika tidak berubah pada run berikutnya.
+7. **Cek** README: tidak ada `{{` tersisa, semua gambar yang di-embed benar-benar ada di `./assets/`, semua nama file di tabel benar-benar ada.
 
 ### 2.3 Aturan Gaya Bahasa ELI5 (WAJIB)
 
@@ -211,9 +247,9 @@ Alt text wajib mendeskripsikan isi gambar dalam bahasa sederhana.
    npx -y playwright screenshot --viewport-size=1280,800 --wait-for-timeout=1500 --full-page \
      "http://localhost:3000/login" "src/app/login/assets/login-page.png"
    ```
-6. **Ambil screenshot elemen** (komponen tertentu): buat file sementara `.eli5-shot.mjs` di `PROJECT_ROOT`, jalankan, lalu **hapus**:
+6. **Ambil screenshot elemen** (komponen tertentu): buat file sementara `.babydocs-shot.mjs` di `PROJECT_ROOT`, jalankan, lalu **hapus**:
    ```js
-   // .eli5-shot.mjs — HAPUS setelah dipakai
+   // .babydocs-shot.mjs — HAPUS setelah dipakai
    import { chromium } from 'playwright';
    const shots = [
      // { url, selector, out }
@@ -228,7 +264,7 @@ Alt text wajib mendeskripsikan isi gambar dalam bahasa sederhana.
    await browser.close();
    ```
    ```bash
-   node .eli5-shot.mjs && rm .eli5-shot.mjs
+   node .babydocs-shot.mjs && rm .babydocs-shot.mjs
    ```
    Pilih selector yang stabil: `[data-testid=...]` > `#id` > tag semantik (`header`, `nav`, `form`) > class.
 7. **Halaman yang butuh login/data**: jika ada akun demo/seed di README lama atau `.env.example`, kamu boleh login lewat script di atas. **Jangan pernah** memasukkan kredensial asli user ke dokumentasi atau screenshot. Jika tidak bisa diakses → pakai fallback (2.5).
@@ -239,7 +275,7 @@ Alt text wajib mendeskripsikan isi gambar dalam bahasa sederhana.
 Pilih metode pertama yang berhasil, berurutan:
 
 1. **Flutter → golden test (diutamakan, tidak perlu simulator):**
-   - Buat file sementara `test/eli5_docs/<nama>_eli5_test.dart`:
+   - Buat file sementara `test/babydocs_shots/<nama>_babydocs_test.dart`:
      ```dart
      import 'package:flutter/material.dart';
      import 'package:flutter_test/flutter_test.dart';
@@ -260,11 +296,11 @@ Pilih metode pertama yang berhasil, berurutan:
        });
      }
      ```
-   - Jalankan: `flutter test --update-goldens test/eli5_docs/`
-   - Salin `test/eli5_docs/goldens/<nama>.png` → `<FolderDok>/assets/<nama>.png`.
+   - Jalankan: `flutter test --update-goldens test/babydocs_shots/`
+   - Salin `test/babydocs_shots/goldens/<nama>.png` → `<FolderDok>/assets/<nama>.png`.
    - Jika widget butuh Provider/Bloc/Riverpod/GetX/dependency injection, bungkus dengan provider berisi data dummy. Jika terlalu rumit (>30 baris setup), lewati ke metode berikutnya.
    - Catatan: golden test default merender teks sebagai kotak. Jika package `golden_toolkit` sudah ada di `dev_dependencies`, panggil `await loadAppFonts();` di awal. Jangan menambah dependensi baru tanpa izin user.
-   - **Hapus seluruh folder `test/eli5_docs/`** setelah selesai.
+   - **Hapus seluruh folder `test/babydocs_shots/`** setelah selesai.
 2. **Simulator/emulator yang sedang berjalan:**
    - iOS: `xcrun simctl io booted screenshot "<FolderDok>/assets/<nama>.png"`
    - Android: `adb exec-out screencap -p > "<FolderDok>/assets/<nama>.png"`
@@ -354,7 +390,7 @@ Gunakan `SKILL_DIR/templates/_sidebar-template.md` sebagai acuan format.
 ### 3.3 `index.html` dan `.nojekyll`
 
 1. Salin `SKILL_DIR/templates/index.html` → `PROJECT_ROOT/index.html`.
-   - **Jika `PROJECT_ROOT/index.html` sudah ada** dan bukan hasil skill ini (tidak mengandung komentar `eli5-visual-docs`), JANGAN menimpanya (bisa jadi itu file aplikasi, mis. Vite/HTML statis). Sebagai gantinya, salin ke `PROJECT_ROOT/docs.html` dan sebutkan hal ini di README root serta laporan akhir.
+   - **Jika `PROJECT_ROOT/index.html` sudah ada** dan bukan hasil skill ini (tidak mengandung komentar `babydocs`), JANGAN menimpanya (bisa jadi itu file aplikasi, mis. Vite/HTML statis). Sebagai gantinya, salin ke `PROJECT_ROOT/docs.html` dan sebutkan hal ini di README root serta laporan akhir.
 2. Ganti placeholder `{{PROJECT_NAME}}` dengan nama proyek (dari `package.json`/`pubspec.yaml`/nama folder).
 3. Ganti `{{REPO_URL}}` dengan URL remote git (`git remote get-url origin`, ubah format `git@github.com:a/b.git` → `https://github.com/a/b`). Jika tidak ada remote, hapus baris `repo:` di konfigurasi.
 4. Buat file kosong `PROJECT_ROOT/.nojekyll` (wajib agar GitHub Pages tidak menyembunyikan `_sidebar.md`).
@@ -387,8 +423,8 @@ Jalankan semua pemeriksaan berikut dari `PROJECT_ROOT`, perbaiki setiap kegagala
    ```
    Harus kosong.
 3. **Semua gambar yang di-embed ada:** untuk setiap `![...](./assets/x.png)` di sebuah README, pastikan file `assets/x.png` ada di folder README itu.
-4. **Mermaid valid:** periksa ulang setiap blok terhadap aturan sintaks 2.4.C. Jika `@mermaid-js/mermaid-cli` tersedia, boleh validasi dengan `npx -y @mermaid-js/mermaid-cli -i <file.md> -o /tmp/eli5-check.md`.
-5. **File sementara terhapus:** `.eli5-shot.mjs`, `test/eli5_docs/` tidak ada lagi.
+4. **Mermaid valid:** periksa ulang setiap blok terhadap aturan sintaks 2.4.C. Jika `@mermaid-js/mermaid-cli` tersedia, boleh validasi dengan `npx -y @mermaid-js/mermaid-cli -i <file.md> -o /tmp/babydocs-check.md`.
+5. **File sementara terhapus:** `.babydocs-shot.mjs`, `test/babydocs_shots/` tidak ada lagi.
 6. **Proses latar belakang mati:** dev server, Metro, emulator yang kamu nyalakan.
 7. **Source code tidak berubah:** `git status --porcelain` hanya menampilkan `README.md`, `assets/`, `_sidebar.md`, `index.html`/`docs.html`, `.nojekyll`.
 8. (Opsional) Jalankan `npx -y docsify-cli serve .` sebentar dan, jika Playwright tersedia, ambil screenshot `http://localhost:3000` untuk memastikan halaman depan, sidebar, dan minimal satu diagram Mermaid tampil. Matikan server setelahnya.
@@ -416,7 +452,8 @@ Selain itu, ambil keputusan sendiri dengan aturan di dokumen ini dan lanjutkan.
 ## Mode Update (dijalankan ulang)
 
 Jika skill dipanggil lagi pada proyek yang sudah punya dokumentasi hasil skill ini:
-1. Jika git tersedia, cari folder yang berubah sejak commit terakhir yang menyentuh dokumentasi: `git log -1 --format=%H -- _sidebar.md` lalu `git diff --name-only <hash> HEAD`.
-2. Perbarui hanya README folder yang file source-nya berubah, plus semua folder induknya (bottom-up) dan `_sidebar.md`.
+1. Jalankan ulang scanner (Fase 1.0). Folder `unchanged` dilewati; kerjakan hanya folder `new` dan `changed`.
+2. Perbarui juga semua folder induk dari folder yang berubah (bottom-up) dan `_sidebar.md`.
 3. Ambil ulang screenshot hanya untuk folder UI yang berubah.
 4. Hapus README/aset hasil skill untuk folder yang sudah tidak ada, dan buang tautannya dari sidebar.
+5. Jika scanner tidak bisa dipakai dan git tersedia, gunakan `git log -1 --format=%H -- _sidebar.md` lalu `git diff --name-only <hash> HEAD` untuk mencari folder yang berubah.
