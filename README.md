@@ -10,7 +10,7 @@ Every folder gets a `README.md` that explains what the code does using everyday 
 
 ## Install
 
-No manual Python or `PATH` setup required. The installer checks your machine, installs a standalone Python runtime if none is found, puts `babydocs` on your `PATH`, and links the skill to any installed coding agent (`~/.gemini/antigravity/skills`, `~/.claude/skills`, `~/.gemini/skills`).
+No manual Python or `PATH` setup required. The installer checks your machine, installs a standalone Python runtime if none is found, puts `babydocs` on your `PATH`, and links the skill to any installed coding agent (`~/.gemini/antigravity/skills`, `~/.claude/skills`, `~/.gemini/skills`, `~/.codex/skills`, `~/.agents/skills`, `~/.cursor/skills`).
 
 **macOS / Linux:**
 
@@ -37,7 +37,8 @@ If you use another coding agent (Codex, Cursor, etc.), point it to `~/babydocs/S
 Open any project in your coding agent and invoke the skill:
 
 ```text
-/babydocs
+/babydocs       # Claude Code, Antigravity, Gemini CLI
+$babydocs       # Codex
 ```
 
 You can also scope or update it:

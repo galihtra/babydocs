@@ -51,7 +51,7 @@ if ($parts -notcontains $BinDir) {
 }
 
 # Hubungkan skill ke coding agent yang terdeteksi
-foreach ($rel in @(".gemini\antigravity", ".claude", ".gemini")) {
+foreach ($rel in @(".gemini\antigravity", ".claude", ".gemini", ".codex", ".agents", ".cursor")) {
   $base = Join-Path $HOME $rel
   if (Test-Path $base) {
     $skillsDir = Join-Path $base "skills"

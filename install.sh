@@ -135,7 +135,7 @@ add_to_path() {
 
 link_agent_skills() {
   LINKED=""
-  for base in "$HOME/.gemini/antigravity" "$HOME/.claude" "$HOME/.gemini"; do
+  for base in "$HOME/.gemini/antigravity" "$HOME/.claude" "$HOME/.gemini" "$HOME/.codex" "$HOME/.agents" "$HOME/.cursor"; do
     if [ -d "$base" ]; then
       mkdir -p "$base/skills"
       target="$base/skills/babydocs"
