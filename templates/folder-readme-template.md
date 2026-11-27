@@ -1,15 +1,16 @@
 <!-- babydocs:start -->
 <!-- babydocs:hash={{HASH_FOLDER_DARI_PETA_PROYEK}} -->
 <!--
-  TEMPLATE README SUB-FOLDER
-  - Ganti semua {{PLACEHOLDER}}.
-  - Hapus bagian yang tidak relevan (mis. "Screenshot" untuk folder backend, atau "Diagram Alur" jika sudah cukup dengan screenshot).
-  - Hapus semua komentar HTML petunjuk ini sebelum menyimpan, KECUALI penanda babydocs:start / babydocs:hash / babydocs:end.
+  TEMPLATE README SUB-FOLDER (LEVEL FILE + CLASS + KOMPONEN + FUNGSI)
+  - Ganti semua {{PLACEHOLDER}} dengan informasi NYATA dari kode yang dibaca.
+  - Hapus bagian yang tidak relevan (mis. hapus "Props" jika ini service non-UI, hapus "Screenshot" jika backend).
+  - DILARANG mengisi teks generik seperti "Menangani bagian X" atau diagram 2-node dummy.
+  - Hapus komentar petunjuk ini sebelum menyimpan, KECUALI penanda babydocs:start / babydocs:hash / babydocs:end.
 -->
 
 # {{EMOJI}} {{NAMA_FOLDER_RAMAH}}
 
-> **Singkatnya:** {{SATU_KALIMAT_ELI5 — mis. "Folder ini ibarat satpam di pintu depan: dia memastikan hanya orang yang punya kartu yang boleh masuk."}}
+> **Singkatnya:** {{SATU_KALIMAT_ELI5_SPESIFIK — jelaskan peran nyata folder ini, bukan kalimat umum}}
 
 📁 Lokasi: `{{PATH_FOLDER_DARI_ROOT}}` · 🧩 Tipe: `{{web-ui | mobile-ui | backend-api | cli-library}}`
 
@@ -17,27 +18,13 @@
 
 ## 🪆 Penjelasan Super Sederhana
 
-{{ANALOGI_BESAR — 3 s.d. 6 kalimat pendek. Satu dunia analogi untuk seluruh folder.}}
+{{ANALOGI_BESAR — 3 s.d. 6 kalimat pendek yang spesifik terhadap perilaku kode di folder ini. Satu dunia analogi untuk seluruh folder.}}
 
-> 🔧 **Aslinya:** {{RINGKASAN_TEKNIS — mis. "Modul autentikasi berbasis JWT. Entry: `auth.module.ts`, dipakai oleh `app.module.ts`."}}
-
-### {{EMOJI}} {{ANALOGI_BAGIAN_1 — mis. "Kasir yang Mengecek Kartu Member"}}
-
-{{2–4 kalimat pendek menjelaskan bagian ini dengan analogi.}}
-
-> 🔧 **Aslinya:** `{{nama_file.ext}}` → `{{namaFungsi(param)}}` — {{penjelasan teknis singkat & akurat}}
-
-### {{EMOJI}} {{ANALOGI_BAGIAN_2}}
-
-{{2–4 kalimat pendek.}}
-
-> 🔧 **Aslinya:** `{{nama_file.ext}}` → props `{{propA}}`, `{{propB}}` — {{penjelasan teknis singkat}}
+> 🔧 **Aslinya:** {{RINGKASAN_TEKNIS — sebutkan class/komponen/entry utama dan cara folder ini dipakai oleh bagian lain.}}
 
 ---
 
 ## 👀 Lihat Wujudnya
-
-<!-- ===== PILIH SALAH SATU / KEDUANYA SESUAI TIPE FOLDER ===== -->
 
 <!-- [A] UNTUK web-ui / mobile-ui: Screenshot -->
 ### 📸 Screenshot
@@ -46,70 +33,67 @@
 
 *{{Keterangan: apa yang sedang kita lihat, tunjuk bagian penting.}}*
 
-<!-- Jika screenshot gagal, ganti blok di atas dengan: -->
-<!-- > 📸 Screenshot belum tersedia: {{alasan}}. Jalankan ulang skill setelah {{syarat}} terpenuhi. -->
-
-<!-- [B] UNTUK backend-api / cli-library / logika: Diagram Alur -->
+<!-- [B] DIAGRAM ALUR NYATA (wajib pakai nama class/method/state asli, minimal 3 node bermakna) -->
 ### 🗺️ Diagram Alur
 
 ```mermaid
 flowchart TD
-    mulai["Pengunjung datang (HTTP Request)"] --> cek{"Kartu valid? (verifyToken)"}
-    cek -- "Ya" --> masuk["Boleh masuk (next())"]
-    cek -- "Tidak" --> tolak["Ditolak di pintu (401 Unauthorized)"]
+    req["Permintaan masuk ({{NamaEntry}})"] --> proc["{{Langkah nyata 1}} ({{namaMethod1}})"]
+    proc --> cek{"{{Kondisi nyata}}?"}
+    cek -- "Ya" --> ok["{{Hasil sukses}} ({{OutputSukses}})"]
+    cek -- "Tidak" --> err["{{Hasil gagal}} ({{OutputGagal}})"]
 ```
-
-<!-- Alternatif untuk interaksi antar bagian:
-```mermaid
-sequenceDiagram
-    participant U as "Pengguna (Client)"
-    participant K as "Kasir (Controller)"
-    participant D as "Dapur (Service)"
-    participant G as "Gudang (Database)"
-    U->>K: Pesan makanan (POST /orders)
-    K->>D: Teruskan pesanan (createOrder)
-    D->>G: Ambil bahan (INSERT orders)
-    G-->>D: Bahan siap
-    D-->>K: Makanan jadi
-    K-->>U: Ini pesananmu (201 Created)
-```
--->
 
 ---
 
-## 🍱 Contoh Masuk & Keluar
+## 🧩 Bedah Komponen, Class & Fungsi
 
-<!-- API -->
-**Yang dikirim (Input):**
+<!-- Ulangi blok ### di bawah untuk SETIAP class / komponen / widget / service penting di folder ini -->
 
-```http
-{{METHOD}} {{/path/endpoint}}
-Content-Type: application/json
+### 1. `{{NamaClassAtauKomponen}}`
 
-{{BODY_JSON — nama field HARUS asli dari kode}}
-```
+{{2–3 kalimat analogi ELI5 yang menjelaskan persis apa tugas class/komponen ini.}}
 
-**Yang diterima (Output):**
+> 🔧 **Aslinya:** `{{nama_file.ext}}` → `{{class/component/widget NamaClassAtauKomponen}}`
 
-```json
-{{RESPONSE_JSON — status & field asli}}
-```
+<!-- Jika ini KOMPONEN / WIDGET UI: tampilkan Props / Parameter -->
+**Props / Parameter:**
 
-<!-- CLI: ganti dengan contoh perintah & output terminal -->
-<!-- Library/Widget/Komponen: ganti dengan contoh pemakaian, mis.
-```tsx
-<LoginForm isLoading={false} onSubmit={(email, password) => login(email, password)} />
-```
--->
+| Nama | Tipe / Wajib | Artinya (bahasa sederhana) |
+|---|---|---|
+| `{{prop1}}` | `{{String}}` (wajib) | {{penjelasan singkat}} |
+| `{{onTap}}` | `{{VoidCallback?}}` (opsional) | {{apa yang terjadi saat dipicu}} |
 
----
+<!-- Jika ini CLASS / SERVICE / CUBIT / CONTROLLER / REPOSITORY: tampilkan Method / Aksi -->
+**Method / Aksi:**
 
-## 📋 Isi Penting
-
-| Nama File | Tugas Utama | Input | Output |
+| Method | Input | Output / Efek | Tugas (bahasa sederhana) |
 |---|---|---|---|
-| `{{file_1.ext}}` | {{Tugas dalam bahasa sederhana, maks. 12 kata}} | `{{props/param/request}}` | `{{return/render/response/efek samping}}` |
-| `{{file_2.ext}}` | {{...}} | `{{...}}` | `{{...}}` |
+| `{{methodA(param)}}` | `{{param: Tipe}}` | `{{Return / emit State / HTTP call}}` | {{apa yang dilakukan method ini}} |
+| `{{methodB()}}` | `—` | `{{...}}` | {{...}} |
+
+**Contoh Pemakaian:**
+
+```{{bahasa}}
+{{CONTOH_NYATA — pemanggilan komponen, method, atau request/response berdasarkan kode}}
+```
+
+---
+
+<!-- Jika ada fungsi-fungsi lepas (utility, helper, mapper, validator, hook): -->
+### ⚙️ Fungsi Lepas
+
+| Fungsi | File | Input | Output | Tugas (bahasa sederhana) |
+|---|---|---|---|---|
+| `{{namaFungsi(a, b)}}` | `{{file.ext}}` | `{{a: Tipe, b: Tipe}}` | `{{TipeReturn}}` | {{penjelasan singkat & spesifik}} |
+
+---
+
+## 📋 Ringkasan File
+
+| Nama File | Isi Utama (Class / Komponen / Fungsi) | Peran Singkat |
+|---|---|---|
+| `{{file_1.ext}}` | `{{ClassA}}`, `{{helperB()}}` | {{Peran spesifik dalam 1 kalimat pendek}} |
 
 <!-- Hapus bagian ini jika folder tidak punya sub-folder ber-README -->
 ### 📂 Sub-folder

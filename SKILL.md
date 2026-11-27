@@ -48,13 +48,13 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
 
 Tujuan: memahami seluruh codebase dengan **jumlah pembacaan file seminimal mungkin**. Jangan pernah membuka file satu per satu secara acak.
 
-1. **Peta dulu, baca kemudian.** Jalankan scanner satu kali (Fase 1.0). Hasilnya sudah berisi stack, daftar Folder Dok bottom-up, dan *kerangka* tiap file (class/fungsi/export, route API, import lokal, jumlah baris, tanda UI). Untuk banyak file, kerangka ini **sudah cukup** untuk mengisi tabel Isi Penting.
+1. **Peta dulu, baca kemudian.** Jalankan scanner satu kali (Fase 1.0). Hasilnya sudah berisi stack, daftar Folder Dok bottom-up, dan *kerangka* tiap file (class/komponen, method, props/fields, route API, import lokal, jumlah baris, tanda UI).
 2. **Lewati yang tidak berubah.** Folder berstatus `unchanged` di Peta Proyek (hash cocok dengan penanda di README) **tidak boleh dibaca ulang** kecuali user meminta regenerasi penuh.
-3. **Baca bertingkat (3 level), berhenti sedini mungkin:**
-   - **L1 — Kerangka** (dari scanner): selalu cukup untuk file kecil (< 40 baris), DTO/model/type, barrel/index, konstanta.
-   - **L2 — Bagian penting:** untuk file 40–400 baris, baca file utuh *sekali*.
-   - **L3 — Terarah:** untuk file > 400 baris, JANGAN baca utuh. Cari dulu (`grep -n`/`rg -n`) baris signature, route, `export`, `build(`, `return (`, lalu baca hanya rentang di sekitarnya (±40 baris).
-4. **Prioritaskan file "pusat".** Per folder, baca penuh lebih dulu: entry/module/router/controller/screen/page utama, dan file yang paling sering di-import oleh file lain (lihat kolom `import` di Peta Proyek). File pendukung cukup L1.
+3. **Baca bertingkat (3 level) — cepat tapi TETAP mendalam:**
+   - **L1 — Kerangka** (dari scanner): HANYA cukup untuk file barrel/re-export (`index.ts`, `exports.dart`), enum/konstanta sederhana, atau DTO polos tanpa logika.
+   - **L2 — Baca utuh sekali:** WAJIB untuk semua file komponen/widget UI, class, service, controller, cubit/store, hook, repository, dan helper dengan ukuran ≤ 400 baris — supaya kamu benar-benar tahu **props, method, state, dan perilakunya**.
+   - **L3 — Terarah:** untuk file > 400 baris, cari dulu (`grep -n`/`rg -n`) deklarasi class, constructor/props, method publik, route, dan `build`/`render`, lalu baca rentang kodenya agar setiap method dan props tetap terdokumentasi akurat.
+4. **DILARANG keras pakai script generator massal / teks template generik.** Cepat bukan berarti mengorbankan isi. Kamu WAJIB menulis penjelasan yang spesifik untuk setiap folder, class, komponen, dan fungsi — bukan menempel teks generik seperti `"Menangani bagian X"` atau `"Folder ini ibarat ruang kerja"`.
 5. **Batch, jangan satu-satu.** Dalam satu giliran, baca semua file yang dibutuhkan satu folder secara paralel. Untuk L3, gabungkan beberapa pencarian dalam satu perintah, mis. `rg -n "export |@Get|@Post|class " src/modules/auth`.
 6. **Bagi kerja ke sub-agent (jika agent-mu mendukung).** Jika Folder Dok > 15 atau total baris > 20.000:
    - Pecah per **sub-pohon level teratas** (mis. `src/modules/auth`, `src/modules/tryout`, `lib/features/courses`). Satu sub-agent per sub-pohon, jalankan paralel.
@@ -179,12 +179,15 @@ Proses Folder Dok **dari yang paling dalam ke paling dangkal** (bottom-up). Alas
 Untuk setiap Folder Dok:
 
 1. **Baca** file di folder tersebut mengikuti [Strategi Membaca Cepat](#-strategi-membaca-cepat-wajib-diikuti) (L1 → L2 → L3). Lewati folder berstatus `unchanged`.
-2. **Identifikasi**: tanggung jawab utama folder, export/public API, input (props, parameter, request body, argumen CLI, env var), output (render UI, return value, response, efek samping seperti tulis DB/kirim email), dan dependensi ke folder lain.
-3. **Pilih analogi** (lihat 2.3).
-4. **Buat visual** sesuai adapter (lihat 2.4).
-5. **Tulis `README.md`** dengan menyalin struktur `SKILL_DIR/templates/folder-readme-template.md`, isi semua placeholder `{{...}}`, dan **hapus** bagian template yang tidak relevan (jangan biarkan placeholder kosong tersisa).
-6. **Tulis penanda hash** tepat di bawah `<!-- babydocs:start -->`: `<!-- babydocs:hash=<hash folder dari Peta Proyek> -->`. Ini yang membuat scanner bisa melewati folder ini jika tidak berubah pada run berikutnya.
-7. **Cek** README: tidak ada `{{` tersisa, semua gambar yang di-embed benar-benar ada di `./assets/`, semua nama file di tabel benar-benar ada.
+2. **Identifikasi hingga level simbol (WAJIB, bukan cuma nama file):**
+   - **Komponen / Widget UI**: nama komponen, daftar **props/parameter** (wajib/opsional, tipe, artinya), varian/state tampilan, callback/event (`onTap`, `onSubmit`, dll.), dan contoh pemakaian nyata.
+   - **Class / Service / Controller / Cubit / Store / Repository**: nama class, **setiap method publik** (input parameter, return value / efek samping / perubahan state), serta field/state penting.
+   - **Fungsi lepas (helper, validator, mapper, hook, middleware)**: nama fungsi, input, output, dan kasus khusus (mis. error/fallback).
+3. **Pilih analogi** yang spesifik terhadap cara kerja kode di folder ini (lihat 2.3).
+4. **Buat visual** sesuai adapter (lihat 2.4). Diagram Mermaid **WAJIB** memuat nama class/method/state/komponen nyata (minimal 3 node bermakna; diagram dummy 2-node seperti `Bagian ini -> Berkas langsung` **DILARANG**).
+5. **Tulis `README.md`** mengikuti `SKILL_DIR/templates/folder-readme-template.md`, termasuk bagian **`## 🧩 Bedah Komponen, Class & Fungsi`** dan **`## 📋 Ringkasan File`**. Hapus bagian template yang tidak relevan; jangan biarkan placeholder kosong tersisa.
+6. **Tulis penanda hash** tepat di bawah `<!-- babydocs:start -->`: `<!-- babydocs:hash=<hash folder dari Peta Proyek> -->`.
+7. **Cek** README: tidak ada `{{` tersisa, tidak ada backtick yang tidak tertutup, tidak ada teks boilerplate (`"Menangani bagian ..."`), semua gambar di `./assets/` ada, semua nama file/class/method/props cocok dengan kode asli.
 
 ### 2.3 Aturan Gaya Bahasa ELI5 (WAJIB)
 
@@ -362,7 +365,7 @@ Ingat Aturan Global #3: jika README root sudah berisi dokumentasi buatan user, t
 
 Gunakan `SKILL_DIR/templates/_sidebar-template.md` sebagai acuan format.
 - Baris pertama: `- [🏠 Beranda](/)`
-- Struktur indentasi **mengikuti pohon folder** (2 spasi per level).
+- Struktur indentasi **WAJIB tepat 2 spasi per level** dan **tidak pernah melompati level** (mis. dari 0 spasi langsung ke 4 spasi akan dirender Docsify sebagai code block, bukan link!). Maksimal 3 level indentasi di sidebar agar tetap mudah dibaca.
 - Setiap tautan menunjuk ke file README **dengan path relatif dari root**, tanpa `./` di depan: `- [Auth](src/features/auth/README.md)`.
 - Label = nama folder yang dibuat ramah dibaca + emoji opsional (mis. `🔐 Auth`), urut sesuai urutan logis (entry point dulu, lalu fitur, lalu utilitas).
 - Kelompokkan dengan judul tebal tanpa tautan bila perlu: `- **Fitur**`.

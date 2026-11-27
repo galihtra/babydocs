@@ -267,13 +267,39 @@ def cmd_check(a) -> int:
     if not sb.exists():
         problems.append("_sidebar.md tidak ada")
     else:
-        for link in LINK_RE.findall(sb.read_text(encoding="utf-8", errors="ignore")):
+        sb_lines = sb.read_text(encoding="utf-8", errors="ignore").splitlines()
+        prev_indent = 0
+        for idx, line in enumerate(sb_lines, 1):
+            m = re.match(r"^( *)[-*]\s+", line)
+            if m:
+                indent = len(m.group(1))
+                if indent > prev_indent + 2:
+                    problems.append(
+                        f"_sidebar.md baris {idx}: indentasi meloncat ({prev_indent} → {indent} spasi; bisa jadi code block)"
+                    )
+                prev_indent = indent
+            elif line.strip() == "":
+                prev_indent = 0
+        for link in LINK_RE.findall("\n".join(sb_lines)):
             link = link.split("#")[0]
             if link in ("", "/") or link.startswith(("http://", "https://")):
                 continue
             path = root / link.lstrip("/")
             if not (path.exists() or (path / "README.md").exists() or path.with_suffix(".md").exists()):
                 problems.append(f"link sidebar rusak: {link}")
+    # Cek boilerplate / kualitas dasar di README hasil babydocs
+    boilerplate_re = re.compile(r"(Menangani bagian |Berkas langsung|ruang kerja khusus dalam sebuah sekolah)")
+    for p in readmes:
+        txt = p.read_text(encoding="utf-8", errors="ignore")
+        if "babydocs:start" not in txt:
+            continue
+        rel = p.relative_to(root)
+        if boilerplate_re.search(txt):
+            problems.append(f"terdeteksi teks boilerplate generik: {rel}")
+        for lno, line in enumerate(txt.splitlines(), 1):
+            if not line.strip().startswith("```") and line.count("`") % 2 == 1:
+                problems.append(f"backtick tidak tertutup: {rel}:{lno}")
+                break
     if not find_entry(root):
         problems.append("index.html/docs.html babydocs belum dipasang (jalankan: babydocs init)")
     if not (root / ".nojekyll").exists():

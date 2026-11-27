@@ -290,12 +290,35 @@ def short_import(s: str) -> str:
     return "/".join(s.split("/")[-2:])
 
 
+METHOD_RE = {
+    "js": R(r"^\s+(?:public\s+|async\s+|static\s+|get\s+|set\s+)*(\w+)\s*\([^)]*\)\s*(?::[^{;]+)?\{"),
+    "py": R(r"^\s+(?:async\s+)?def\s+([a-zA-Z]\w*)\s*\("),
+    "dart": R(r"^\s+(?:Future<[^>]*>|Stream<[^>]*>|void|[A-Z]\w*(?:<[^>]*>)?\??|int|double|bool|String)\s+([a-z]\w*)\s*\("),
+    "go": R(r"^func\s+\([^)]+\)\s+([A-Z]\w*)\s*\("),
+    "rs": R(r"^\s+pub(?:\([^)]*\))?\s+(?:async\s+)?fn\s+(\w+)\s*\("),
+    "cs": R(r"^\s+public\s+(?:static\s+|async\s+|virtual\s+|override\s+)*[\w<>\[\],?]+\s+(\w+)\s*\("),
+    "jvm": R(r"^\s+(?:public\s+|suspend\s+|override\s+)*(?:fun\s+)?(\w+)\s*\("),
+    "php": R(r"^\s+public\s+(?:static\s+)?function\s+(\w+)\s*\("),
+    "rb": R(r"^\s+def\s+(?:self\.)?([a-zA-Z]\w*[?!]?)"),
+    "swift": R(r"^\s+(?:public\s+|open\s+|static\s+)*func\s+(\w+)\s*\("),
+}
+PROP_RE = {
+    "dart": R(r"^\s+final\s+[\w<>?,\s]+\s+([a-z]\w*)\s*;"),
+    "js": R(r"^\s+(?:readonly\s+)?([a-zA-Z]\w*)\??\s*:\s*[^;={\n]+[;,]"),
+    "py": R(r"^\s+([a-zA-Z]\w*)\s*:\s*[\w\[\]|., ]+(?:\s*=|$)"),
+    "swift": R(r"^\s+(?:@\w+\s+)?(?:let|var)\s+([a-zA-Z]\w*)\s*:"),
+    "cs": R(r"^\s+public\s+[\w<>?\[\]]+\s+(\w+)\s*\{\s*get;"),
+}
+IGNORE_METH = {"if", "for", "while", "switch", "catch", "constructor", "build", "createState",
+               "initState", "dispose", "didUpdateWidget", "toString", "hashCode", "equals", "super"}
+
+
 def skeleton(path: Path, max_symbols: int) -> dict:
     txt = read(path)
     lines = txt.count("\n") + (1 if txt and not txt.endswith("\n") else 0)
     suf = path.suffix.lower()
     is_tpl_ui = suf in TEMPLATE_UI_EXT or path.name.endswith(".blade.php")
-    info = {"loc": lines, "symbols": [], "routes": [], "imports": [], "ui": is_tpl_ui}
+    info = {"loc": lines, "symbols": [], "methods": [], "props": [], "routes": [], "imports": [], "ui": is_tpl_ui}
     lang = EXT_LANG.get(suf)
     if not lang:
         return info
@@ -309,6 +332,24 @@ def skeleton(path: Path, max_symbols: int) -> dict:
             seen.add(name)
             info["symbols"].append(name)
     info["symbols"] = info["symbols"][:max_symbols]
+    m_rx = METHOD_RE.get(lang)
+    if m_rx:
+        m_seen = set(info["symbols"]) | IGNORE_METH
+        for m in m_rx.finditer(txt):
+            name = m.group(1)
+            if name and name not in m_seen and not name.startswith("_"):
+                m_seen.add(name)
+                info["methods"].append(name)
+        info["methods"] = info["methods"][:max_symbols]
+    p_rx = PROP_RE.get(lang)
+    if p_rx:
+        p_seen = set()
+        for m in p_rx.finditer(txt):
+            name = m.group(1)
+            if name and name not in p_seen and not name.startswith("_"):
+                p_seen.add(name)
+                info["props"].append(name)
+        info["props"] = info["props"][:15]
     for rx in rules["route"]:
         for m in rx.finditer(txt):
             g = [x for x in m.groups() if x is not None]
@@ -452,6 +493,10 @@ def fmt_file(f: str, s: dict) -> str:
     bits = [f"`{Path(f).name}` ({s['loc']} baris{', UI' if s['ui'] else ''})"]
     if s["symbols"]:
         bits.append("sym: " + ", ".join(s["symbols"]))
+    if s.get("methods"):
+        bits.append("methods: " + ", ".join(s["methods"]))
+    if s.get("props"):
+        bits.append("props/fields: " + ", ".join(s["props"]))
     if s["routes"]:
         bits.append("route: " + "; ".join(s["routes"]))
     if s["imports"]:
