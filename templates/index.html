@@ -150,6 +150,25 @@
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup-templating.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-php.min.js"></script>
 
+  <!-- Live reload (aktif hanya saat dibuka lewat `babydocs serve`) -->
+  <script>
+    (function () {
+      var last = null;
+      function tick() {
+        fetch("/__babydocs__/ping", { cache: "no-store" })
+          .then(function (r) { return r.ok ? r.text() : null; })
+          .then(function (v) {
+            if (v === null) return; // bukan babydocs serve (mis. GitHub Pages) → berhenti
+            if (last && v !== last) location.reload();
+            last = v;
+            setTimeout(tick, 1500);
+          })
+          .catch(function () { setTimeout(tick, 3000); });
+      }
+      if (location.protocol.indexOf("http") === 0) tick();
+    })();
+  </script>
+
   <!-- Plugin: Mermaid.js -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>

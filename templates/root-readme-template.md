@@ -1,6 +1,6 @@
 <!-- babydocs:start -->
 <!--
-  TEMPLATE README ROOT (halaman depan Docsify)
+  TEMPLATE README ROOT (halaman depan dokumentasi)
   Ganti semua {{PLACEHOLDER}}, hapus komentar petunjuk, pertahankan penanda start/end.
 -->
 
@@ -41,9 +41,8 @@ flowchart LR
 ## 📖 Cara Membuka Dokumentasi Ini
 
 ```bash
-npx -y docsify-cli serve .     # buka http://localhost:3000
-# atau
-python3 -m http.server 3000    # buka http://localhost:3000
+babydocs serve            # buka http://localhost:3000
+babydocs serve --open     # sekaligus membuka browser
 ```
 
 > Dokumentasi ini dibuat dengan **babydocs**. Jalankan ulang skill setelah kode berubah agar tetap up-to-date.

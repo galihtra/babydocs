@@ -23,6 +23,10 @@ Kode rumit  ──►  🤖 Agent + skill ini  ──►  📚 Web docs yang bis
 babydocs/
 ├── SKILL.md                            # Instruksi utama untuk AI agent
 ├── README.md                           # File ini
+├── install.sh                          # Pasang perintah `babydocs` ke PATH
+├── bin/
+│   ├── babydocs                        # CLI: serve, init, check, scan
+│   └── babydocs.cmd                    # Versi Windows
 ├── scripts/
 │   └── scan.py                         # Scanner cepat: stack + peta folder + kerangka kode (Python stdlib)
 └── templates/
@@ -51,7 +55,17 @@ mkdir -p ~/.claude/skills
 ln -s ~/skills/babydocs ~/.claude/skills/babydocs
 ```
 
-> Pastikan folder `templates/` ikut tersalin — `SKILL.md` merujuk ke sana.
+> Pastikan folder `templates/`, `scripts/`, dan `bin/` ikut tersalin — `SKILL.md` merujuk ke sana.
+
+### Pasang perintah `babydocs` di terminal
+
+```bash
+cd ~/skills/babydocs
+./install.sh                 # memasang ke ~/.local/bin/babydocs
+babydocs --help
+```
+
+Windows: tambahkan folder `bin/` ke `PATH` (berisi `babydocs.cmd`).
 
 ## 🚀 Cara Memanggil
 
@@ -94,8 +108,8 @@ Agent **tidak** membuka file satu per satu. Alurnya begini:
 Coba scanner-nya langsung:
 
 ```bash
-python3 scripts/scan.py /path/ke/proyek --out /tmp/peta.md
-python3 scripts/scan.py /path/ke/proyek --only src/features --json
+babydocs scan /path/ke/proyek --out /tmp/peta.md
+babydocs scan /path/ke/proyek --only src/features --json
 ```
 
 ## 🧰 Dependensi Opsional
@@ -109,26 +123,34 @@ Tidak ada dependensi wajib. Visual dipilih otomatis; jika alat tidak tersedia, s
 | Screenshot Flutter | Flutter SDK (golden test) | sudah termasuk `flutter_test` |
 | Screenshot iOS | Xcode + Simulator | `xcrun simctl` |
 | Screenshot Android | Android SDK Platform Tools | `adb` |
-| Preview docs | Node.js **atau** Python 3 | `npx docsify-cli` / `python3 -m http.server` |
+| Preview docs | Python 3.8+ | `babydocs serve` (sudah termasuk) |
 | Validasi Mermaid (opsional) | `@mermaid-js/mermaid-cli` | `npx @mermaid-js/mermaid-cli` |
+
+## 💻 Perintah `babydocs`
+
+| Perintah | Fungsi |
+|---|---|
+| `babydocs serve` | Buka web dokumentasi di `http://localhost:3000` (live reload otomatis) |
+| `babydocs serve --open` | Sama, sekaligus membuka browser |
+| `babydocs serve -p 8080` | Pakai port lain (jika port terpakai, otomatis pindah ke port berikutnya) |
+| `babydocs serve --host 0.0.0.0` | Bisa dibuka dari HP/laptop lain di Wi-Fi yang sama |
+| `babydocs init` | Pasang `index.html` + `.nojekyll` di proyek |
+| `babydocs check` | Cek link sidebar, gambar, placeholder yang tertinggal |
+| `babydocs scan` | Buat Peta Proyek (dipakai agent) |
 
 ## 👀 Preview Web Dokumentasi Secara Lokal
 
 Setelah skill selesai, di root proyek kamu akan ada `index.html`, `_sidebar.md`, `README.md`, dan `.nojekyll`. Jalankan:
 
 ```bash
-# Opsi 1 — Docsify CLI (live reload)
-npx docsify-cli serve .
-# buka http://localhost:3000
-
-# Opsi 2 — Tanpa Node.js
-python3 -m http.server 3000
+cd /path/ke/proyek
+babydocs serve
 # buka http://localhost:3000
 ```
 
-> ⚠️ Jangan buka `index.html` dengan klik dua kali (`file://`) — Docsify butuh server karena memuat Markdown via `fetch`.
+> ⚠️ Jangan buka `index.html` dengan klik dua kali (`file://`) — dokumentasi harus dibuka lewat `babydocs serve` atau GitHub Pages.
 >
-> Jika proyek sudah punya `index.html` sendiri (mis. Vite), skill akan membuat `docs.html` sebagai gantinya → buka `http://localhost:3000/docs.html`.
+> Jika proyek sudah punya `index.html` sendiri (mis. Vite), skill membuat `docs.html` sebagai gantinya — `babydocs serve` otomatis membuka halaman yang benar.
 
 ### Publikasi ke GitHub Pages
 

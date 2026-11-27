@@ -35,6 +35,7 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
 1. Tetapkan `PROJECT_ROOT` = direktori kerja saat ini (atau path yang disebut user).
 2. Tetapkan `SKILL_DIR` = folder tempat `SKILL.md` ini berada. Pastikan file berikut ada:
    - `SKILL_DIR/scripts/scan.py`
+   - `SKILL_DIR/bin/babydocs` (CLI: `scan`, `init`, `check`, `serve`). Jika perintah `babydocs` sudah ada di PATH, kamu boleh memanggilnya langsung; jika tidak, pakai `python3 "SKILL_DIR/bin/babydocs" <perintah>`.
    - `SKILL_DIR/templates/index.html`
    - `SKILL_DIR/templates/folder-readme-template.md`
    - `SKILL_DIR/templates/root-readme-template.md`
@@ -69,7 +70,7 @@ Tujuan: memahami seluruh codebase dengan **jumlah pembacaan file seminimal mungk
 ### 1.0 Jalankan scanner (langkah pertama, satu perintah)
 
 ```bash
-python3 "SKILL_DIR/scripts/scan.py" "PROJECT_ROOT" --out /tmp/babydocs-peta.md
+python3 "SKILL_DIR/bin/babydocs" scan "PROJECT_ROOT" --out /tmp/babydocs-peta.md
 # opsional: --only src/features   (batasi ke sub-folder)
 #           --json                (output JSON untuk diproses lebih lanjut)
 ```
@@ -389,45 +390,44 @@ Gunakan `SKILL_DIR/templates/_sidebar-template.md` sebagai acuan format.
 
 ### 3.3 `index.html` dan `.nojekyll`
 
-1. Salin `SKILL_DIR/templates/index.html` → `PROJECT_ROOT/index.html`.
+1. Jalankan `python3 "SKILL_DIR/bin/babydocs" init "PROJECT_ROOT"`. Perintah ini otomatis:
+   - menyalin `SKILL_DIR/templates/index.html` → `PROJECT_ROOT/index.html` dan mengisi `{{PROJECT_NAME}}` serta `{{REPO_URL}}` (atau menghapus baris `repo:` jika tidak ada remote git);
+   - memakai `docs.html` jika `index.html` milik aplikasi sudah ada (tidak pernah menimpa);
+   - membuat `.nojekyll` (wajib agar GitHub Pages tidak menyembunyikan `_sidebar.md`).
+2. Jika `python3` tidak tersedia, lakukan langkah yang sama secara manual.
    - **Jika `PROJECT_ROOT/index.html` sudah ada** dan bukan hasil skill ini (tidak mengandung komentar `babydocs`), JANGAN menimpanya (bisa jadi itu file aplikasi, mis. Vite/HTML statis). Sebagai gantinya, salin ke `PROJECT_ROOT/docs.html` dan sebutkan hal ini di README root serta laporan akhir.
-2. Ganti placeholder `{{PROJECT_NAME}}` dengan nama proyek (dari `package.json`/`pubspec.yaml`/nama folder).
-3. Ganti `{{REPO_URL}}` dengan URL remote git (`git remote get-url origin`, ubah format `git@github.com:a/b.git` → `https://github.com/a/b`). Jika tidak ada remote, hapus baris `repo:` di konfigurasi.
-4. Buat file kosong `PROJECT_ROOT/.nojekyll` (wajib agar GitHub Pages tidak menyembunyikan `_sidebar.md`).
+3. Ganti placeholder `{{PROJECT_NAME}}` dengan nama proyek (dari `package.json`/`pubspec.yaml`/nama folder) — hanya jika manual.
+4. Ganti `{{REPO_URL}}` dengan URL remote git (`git remote get-url origin`, ubah format `git@github.com:a/b.git` → `https://github.com/a/b`). Jika tidak ada remote, hapus baris `repo:` di konfigurasi — hanya jika manual.
+5. Buat file kosong `PROJECT_ROOT/.nojekyll` — hanya jika manual.
 
 ### 3.4 Cara preview (tulis di README root & laporan)
 
+Di README root dan laporan ke user, tulis **hanya** perintah berikut. JANGAN menyebut nama tool/library pihak ketiga (Docsify, docsify-cli, http.server, CDN, dll.) di dokumentasi yang dilihat user.
+
 ```bash
-npx -y docsify-cli serve .        # http://localhost:3000
-# atau tanpa Node.js:
-python3 -m http.server 3000       # http://localhost:3000
+babydocs serve            # buka http://localhost:3000
+babydocs serve --open     # sekaligus membuka browser
 ```
 
-Docsify tidak bisa dibuka lewat `file://` (klik dua kali file HTML) karena butuh `fetch`. Harus lewat server lokal atau GitHub Pages (Settings → Pages → Deploy from branch → root).
+Jika `babydocs` belum terpasang di PATH user, sebutkan: `python3 <path-skill>/bin/babydocs serve`.
+
+Dokumentasi tidak bisa dibuka lewat `file://` (klik dua kali file HTML). Harus lewat `babydocs serve` atau GitHub Pages (Settings → Pages → Deploy from branch → root).
 
 ---
 
 ## Fase 4 — Verifikasi & Laporan
 
-Jalankan semua pemeriksaan berikut dari `PROJECT_ROOT`, perbaiki setiap kegagalan, lalu ulangi sampai bersih:
+Jalankan pemeriksaan berikut dari `PROJECT_ROOT`, perbaiki setiap kegagalan, lalu ulangi sampai bersih:
 
-1. **Tidak ada placeholder tersisa:**
+1. **Pemeriksaan otomatis (placeholder, gambar, link sidebar, index.html, .nojekyll, file sementara):**
    ```bash
-   grep -rIl --include=README.md --include=_sidebar.md --include=index.html "{{" . --exclude-dir=node_modules --exclude-dir=.git
+   python3 "SKILL_DIR/bin/babydocs" check "PROJECT_ROOT"
    ```
-   Harus kosong.
-2. **Semua tautan sidebar valid:**
-   ```bash
-   grep -oE '\]\([^)]+\)' _sidebar.md | sed -E 's/^\]\(//; s/\)$//' | while read -r p; do
-     [ "$p" = "/" ] && continue; [ -f "$p" ] || echo "MISSING: $p"; done
-   ```
-   Harus kosong.
-3. **Semua gambar yang di-embed ada:** untuk setiap `![...](./assets/x.png)` di sebuah README, pastikan file `assets/x.png` ada di folder README itu.
-4. **Mermaid valid:** periksa ulang setiap blok terhadap aturan sintaks 2.4.C. Jika `@mermaid-js/mermaid-cli` tersedia, boleh validasi dengan `npx -y @mermaid-js/mermaid-cli -i <file.md> -o /tmp/babydocs-check.md`.
-5. **File sementara terhapus:** `.babydocs-shot.mjs`, `test/babydocs_shots/` tidak ada lagi.
-6. **Proses latar belakang mati:** dev server, Metro, emulator yang kamu nyalakan.
-7. **Source code tidak berubah:** `git status --porcelain` hanya menampilkan `README.md`, `assets/`, `_sidebar.md`, `index.html`/`docs.html`, `.nojekyll`.
-8. (Opsional) Jalankan `npx -y docsify-cli serve .` sebentar dan, jika Playwright tersedia, ambil screenshot `http://localhost:3000` untuk memastikan halaman depan, sidebar, dan minimal satu diagram Mermaid tampil. Matikan server setelahnya.
+   Harus menampilkan `✓ Semua beres`.
+2. **Mermaid valid:** periksa ulang setiap blok terhadap aturan sintaks 2.4.C. Jika `@mermaid-js/mermaid-cli` tersedia, boleh validasi dengan `npx -y @mermaid-js/mermaid-cli -i <file.md> -o /tmp/babydocs-check.md`.
+3. **Proses latar belakang mati:** dev server, Metro, emulator yang kamu nyalakan.
+4. **Source code tidak berubah:** `git status --porcelain` hanya menampilkan `README.md`, `assets/`, `_sidebar.md`, `index.html`/`docs.html`, `.nojekyll`.
+5. (Opsional) Jalankan `python3 "SKILL_DIR/bin/babydocs" serve "PROJECT_ROOT" --port 3999 --no-reload` di latar belakang dan, jika Playwright tersedia, ambil screenshot `http://localhost:3999` untuk memastikan halaman depan, sidebar, dan minimal satu diagram Mermaid tampil. Matikan server setelahnya.
 
 **Laporan akhir ke user** (ringkas, maks. 20 baris):
 - Stack & tipe yang terdeteksi.
