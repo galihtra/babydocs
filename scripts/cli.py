@@ -289,6 +289,9 @@ def cmd_check(a) -> int:
                 problems.append(f"link sidebar rusak: {link}")
     # Cek boilerplate / kualitas dasar di README hasil babydocs
     boilerplate_re = re.compile(r"(Menangani bagian |Berkas langsung|ruang kerja khusus dalam sebuah sekolah)")
+    is_flutter = (root / "pubspec.yaml").exists() and "flutter:" in (root / "pubspec.yaml").read_text(
+        encoding="utf-8", errors="ignore"
+    )
     for p in readmes:
         txt = p.read_text(encoding="utf-8", errors="ignore")
         if "babydocs:start" not in txt:
@@ -296,6 +299,21 @@ def cmd_check(a) -> int:
         rel = p.relative_to(root)
         if boilerplate_re.search(txt):
             problems.append(f"terdeteksi teks boilerplate generik: {rel}")
+        # Cek apakah bagian Bedah Komponen cuma tabel 1 baris tanpa sub-judul ### atau halaman detail
+        if "## 🧩 Bedah" in txt:
+            bedah = txt.split("## 🧩 Bedah", 1)[1].split("\n## ", 1)[0]
+            has_sub = bool(re.search(r"^###\s+", bedah, re.M))
+            has_detail_links = bool(re.search(r"\]\(\./[\w-]+\.md\)", bedah))
+            if not has_sub and not has_detail_links:
+                problems.append(
+                    f"bedah terlalu dangkal (tidak ada sub-judul ### per komponen/class atau link detail .md): {rel}"
+                )
+        # Cek alasan malas skip screenshot di proyek Flutter (padahal flutter test headless tersedia)
+        if is_flutter and "Tipe: `mobile-ui`" in txt and "Screenshot belum tersedia" in txt:
+            if re.search(r"simulator.*tidak aktif|emulator.*tidak tersedia", txt, re.I):
+                problems.append(
+                    f"alasan skip screenshot tidak valid untuk Flutter (pakai flutter test --update-goldens tanpa simulator): {rel}"
+                )
         for lno, line in enumerate(txt.splitlines(), 1):
             if not line.strip().startswith("```") and line.count("`") % 2 == 1:
                 problems.append(f"backtick tidak tertutup: {rel}:{lno}")

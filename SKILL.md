@@ -14,7 +14,7 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
 ## Aturan Global (WAJIB, berlaku di semua fase)
 
 1. **JANGAN mengubah source code proyek.** File yang BOLEH kamu buat/ubah hanya:
-   - `README.md` (root & sub-folder)
+   - `README.md` (root & sub-folder) dan halaman detail komponen/class `<nama>.md` di dalam folder yang didokumentasikan
    - `assets/` di dalam folder yang didokumentasikan (hanya berisi gambar `.png`)
    - `_sidebar.md`, `index.html`, `.nojekyll` di root proyek
    - File sementara untuk screenshot (lihat Fase 2.4) — **wajib dihapus** setelah selesai.
@@ -38,6 +38,7 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
    - `SKILL_DIR/bin/babydocs` (CLI: `scan`, `init`, `check`, `serve`, `doctor`). Jika perintah `babydocs` belum ada di PATH, jalankan `sh "SKILL_DIR/install.sh"` (macOS/Linux) atau `powershell -ExecutionPolicy Bypass -File "SKILL_DIR\install.ps1"` (Windows) agar perintah `babydocs` terpasang sekaligus auto-install Python bila belum ada. Kamu juga bisa langsung memanggil `"SKILL_DIR/bin/babydocs" <perintah>` (otomatis memasang Python jika belum ada).
    - `SKILL_DIR/templates/index.html`
    - `SKILL_DIR/templates/folder-readme-template.md`
+   - `SKILL_DIR/templates/component-doc-template.md`
    - `SKILL_DIR/templates/root-readme-template.md`
    - `SKILL_DIR/templates/_sidebar-template.md`
 3. Jika proyek memakai git, jalankan `git status --porcelain` dan catat hasilnya agar di akhir kamu bisa melaporkan file apa saja yang kamu sentuh.
@@ -179,15 +180,19 @@ Proses Folder Dok **dari yang paling dalam ke paling dangkal** (bottom-up). Alas
 Untuk setiap Folder Dok:
 
 1. **Baca** file di folder tersebut mengikuti [Strategi Membaca Cepat](#-strategi-membaca-cepat-wajib-diikuti) (L1 → L2 → L3). Lewati folder berstatus `unchanged`.
-2. **Identifikasi hingga level simbol (WAJIB, bukan cuma nama file):**
-   - **Komponen / Widget UI**: nama komponen, daftar **props/parameter** (wajib/opsional, tipe, artinya), varian/state tampilan, callback/event (`onTap`, `onSubmit`, dll.), dan contoh pemakaian nyata.
-   - **Class / Service / Controller / Cubit / Store / Repository**: nama class, **setiap method publik** (input parameter, return value / efek samping / perubahan state), serta field/state penting.
-   - **Fungsi lepas (helper, validator, mapper, hook, middleware)**: nama fungsi, input, output, dan kasus khusus (mis. error/fallback).
-3. **Pilih analogi** yang spesifik terhadap cara kerja kode di folder ini (lihat 2.3).
-4. **Buat visual** sesuai adapter (lihat 2.4). Diagram Mermaid **WAJIB** memuat nama class/method/state/komponen nyata (minimal 3 node bermakna; diagram dummy 2-node seperti `Bagian ini -> Berkas langsung` **DILARANG**).
-5. **Tulis `README.md`** mengikuti `SKILL_DIR/templates/folder-readme-template.md`, termasuk bagian **`## 🧩 Bedah Komponen, Class & Fungsi`** dan **`## 📋 Ringkasan File`**. Hapus bagian template yang tidak relevan; jangan biarkan placeholder kosong tersisa.
-6. **Tulis penanda hash** tepat di bawah `<!-- babydocs:start -->`: `<!-- babydocs:hash=<hash folder dari Peta Proyek> -->`.
-7. **Cek** README: tidak ada `{{` tersisa, tidak ada backtick yang tidak tertutup, tidak ada teks boilerplate (`"Menangani bagian ..."`), semua gambar di `./assets/` ada, semua nama file/class/method/props cocok dengan kode asli.
+2. **Identifikasi hingga level simbol & alur internal kode (WAJIB, bukan cuma ringkasan file/class 1 baris):**
+   - **Komponen / Widget UI**: nama komponen, **semua props/parameter** (nama, tipe, wajib/opsional, nilai default, artinya), semua **named constructor / varian** (mis. `.filled`, `.tonal`, `.outlined`, `.text`), **alur logika internal** di dalam `build()`/`render()` (apa yang terjadi saat `isLoading`, `disabled`, `error`, ukuran layar/tablet, dll.), callback/event, dan **minimal 2 contoh pemakaian siap pakai**.
+   - **Class / Service / Controller / Cubit / Store / Repository**: nama class, **setiap method publik + helper penting** (parameter, tipe return, efek samping, perubahan state, validasi, penanganan error/retry), serta field/state penting.
+   - **Fungsi lepas (helper, validator, mapper, hook, middleware)**: nama fungsi, input, output, alur percabangan `if/else`, dan kasus khusus.
+3. **Aturan kedalaman halaman (ANTI-DANGKAL):**
+   - **DILARANG** memadatkan banyak komponen/class ke dalam 1 tabel ringkasan 1-baris saja!
+   - Jika folder berisi **1–5** komponen/class/file penting → masing-masing WAJIB punya sub-judul `###` sendiri yang lengkap di `README.md` (analogi + alur kode langkah demi langkah + tabel props/method lengkap + contoh pemakaian).
+   - Jika folder berisi **> 5** komponen reusable / class penting (mis. `shared/widgets/`, `components/ui/`, `services/`) → buat **halaman detail terpisah** `<nama_komponen>.md` di folder yang sama menggunakan `SKILL_DIR/templates/component-doc-template.md`, lalu tautkan dari `README.md` folder dan `_sidebar.md`!
+4. **Pilih analogi** yang spesifik terhadap cara kerja kode di folder ini (lihat 2.3).
+5. **Buat visual** sesuai adapter (lihat 2.4). Diagram Mermaid **WAJIB** memuat nama class/method/state/komponen nyata (minimal 3 node bermakna; diagram dummy 2-node seperti `Bagian ini -> Berkas langsung` **DILARANG**).
+6. **Tulis `README.md`** (dan `<nama>.md` jika > 5 komponen) mengikuti template, hapus bagian template yang tidak relevan; jangan biarkan placeholder kosong tersisa.
+7. **Tulis penanda hash** tepat di bawah `<!-- babydocs:start -->`: `<!-- babydocs:hash=<hash folder dari Peta Proyek> -->`.
+8. **Cek** README: tidak ada `{{` tersisa, tidak ada backtick yang tidak tertutup, tidak ada teks boilerplate (`"Menangani bagian ..."`), semua gambar di `./assets/` ada, semua nama file/class/method/props cocok dengan kode asli.
 
 ### 2.3 Aturan Gaya Bahasa ELI5 (WAJIB)
 
@@ -276,22 +281,61 @@ Berlaku untuk React, Next.js, Vue, Nuxt, Svelte, Angular, Astro, **Laravel (Blad
 7. **Halaman yang butuh login/data**: jika ada akun demo/seed di README lama atau `.env.example`, kamu boleh login lewat script di atas. **Jangan pernah** memasukkan kredensial asli user ke dokumentasi atau screenshot. Jika tidak bisa diakses → pakai fallback (2.5).
 8. Setelah semua screenshot selesai, **matikan dev server**.
 
-#### B. `mobile-ui` (Android Kotlin/Java, iOS SwiftUI/UIKit, .NET MAUI, React Native/Expo, Flutter, serta GUI desktop)
+#### B. `mobile-ui` (Flutter, React Native/Expo, Android Kotlin/Java, iOS SwiftUI/UIKit, .NET MAUI, serta GUI desktop)
 
-Pilih metode pertama yang cocok dengan stack proyek dan berhasil:
+> **ATURAN KERAS SCREENSHOT:** Kamu **WAJIB** benar-benar menjalankan perintah capture di terminal dan menghasilkan PNG asli di `<FolderDok>/assets/`. **DILARANG** menyerah atau menulis `Screenshot belum tersedia` hanya karena simulator tidak menyala!
 
-1. **Simulator / emulator yang sedang berjalan (berlaku untuk semua mobile stack — SwiftUI, Kotlin/Compose, .NET MAUI, React Native, Flutter):**
-   - iOS: `xcrun simctl io booted screenshot "<FolderDok>/assets/<nama>.png"`
-   - Android: `adb exec-out screencap -p > "<FolderDok>/assets/<nama>.png"`
-   - Jalankan aplikasi sesuai stack (`xcodebuild`/Xcode, `./gradlew installDebug`, `dotnet build -t:Run`, `npx expo start`, `flutter run`), navigasikan ke layar target (pakai deep link jika tersedia: `xcrun simctl openurl booted <scheme>://<path>` atau `adb shell am start -W -a android.intent.action.VIEW -d "<scheme>://<path>"`).
-   - Jangan menyalakan simulator baru jika memakan waktu > 3 menit; lanjut ke metode berikutnya atau fallback.
-2. **Snapshot / golden / UI preview test (tanpa perlu simulator penuh):**
+Pilih metode pertama yang cocok dengan stack proyek dan **eksekusi langsung**:
+
+1. **Snapshot / golden test HEADLESS (PRIORITAS #1 untuk komponen reusable — TIDAK BUTUH simulator!):**
+   - **Flutter (WAJIB dicoba dulu jika `flutter` tersedia):**
+     Buat file sementara `test/babydocs_shots/<nama>_babydocs_test.dart`. Render komponen beserta variasi utamanya (mis. `filled`, `tonal`, `outlined`, `text`, `isLoading`, `disabled`) dalam 1 `Column`/`Wrap` dengan padding bersih. Jika proyek memakai `flutter_screenutil`, bungkus dengan `ScreenUtilInit(designSize: const Size(390, 844), builder: (_, __) => MaterialApp(...))`.
+     ```dart
+     import 'package:flutter/material.dart';
+     import 'package:flutter_test/flutter_test.dart';
+     // import 'package:flutter_screenutil/flutter_screenutil.dart'; // jika dipakai proyek
+     // import 'package:<nama_package>/<path_widget>.dart';
+
+     void main() {
+       testWidgets('babydocs <NamaWidget>', (tester) async {
+         tester.view.physicalSize = const Size(840, 1200);
+         tester.view.devicePixelRatio = 2.0;
+         addTearDown(tester.view.reset);
+         await tester.pumpWidget(
+           MaterialApp(
+             debugShowCheckedModeBanner: false,
+             home: Scaffold(
+               backgroundColor: Colors.white,
+               body: Padding(
+                 padding: const EdgeInsets.all(24),
+                 child: Column(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     // Render variasi komponen nyata di sini
+                   ],
+                 ),
+               ),
+             ),
+           ),
+         );
+         await tester.pumpAndSettle();
+         await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/<nama>.png'));
+       });
+     }
+     ```
+     Jalankan:
+     ```bash
+     flutter test --update-goldens test/babydocs_shots/
+     ```
+     Salin semua `test/babydocs_shots/goldens/*.png` → `<FolderDok>/assets/`, lalu **hapus seluruh folder `test/babydocs_shots/`**.
    - **Android (Compose/XML)**: gunakan Paparazzi / Roborazzi / Screenshot Testing jika sudah terpasang di Gradle.
    - **iOS (SwiftUI/UIKit)**: gunakan `swift-snapshot-testing` jika sudah ada di proyek.
-   - **Flutter**: buat golden test sementara di `test/babydocs_shots/<nama>_babydocs_test.dart`, jalankan `flutter test --update-goldens test/babydocs_shots/`, salin PNG ke `<FolderDok>/assets/`, lalu **hapus seluruh folder `test/babydocs_shots/`**.
    - Jangan menambah dependensi baru ke proyek tanpa izin user.
-3. **Web / desktop target**: jika proyek mendukung target web (`react-native-web`, `expo start --web`, Tauri/Electron/Wails), perlakukan seperti `web-ui` dengan viewport sesuai target (`390,844` untuk mobile, `1280,800` untuk desktop).
-4. Jika semua tidak memungkinkan → fallback (2.5).
+2. **Web / desktop target (headless via Playwright):** jika proyek mendukung target web (`react-native-web`, `expo start --web`, Tauri/Electron/Wails), perlakukan seperti `web-ui` dengan viewport `390,844` (mobile) atau `1280,800` (desktop).
+3. **Simulator / emulator (untuk layar penuh / aplikasi native murni):**
+   - Cek perangkat aktif: `xcrun simctl list devices booted` (iOS) / `adb devices` (Android).
+   - Jika di macOS belum ada yang booted tapi ada iOS simulator terpasang, kamu BOLEH menyalakan 1 simulator (`xcrun simctl boot <UDID>`), jalankan app, lalu tangkap dengan `xcrun simctl io booted screenshot "<FolderDok>/assets/<nama>.png"` (Android: `adb exec-out screencap -p > "<FolderDok>/assets/<nama>.png"`). Matikan simulator setelah selesai jika kamu yang menyalakannya.
+4. **Fallback (2.5) HANYA boleh dipakai** jika metode di atas sudah benar-benar dieksekusi dan gagal (wajib cantumkan ringkasan error asli dari terminal!).
 
 #### C. `backend-api`, `cli-library`, dan folder logika non-UI
 
@@ -312,14 +356,14 @@ Pilih metode pertama yang cocok dengan stack proyek dan berhasil:
    - Library/fungsi: contoh pemanggilan dan nilai kembaliannya.
    - Jangan mengarang field. Jika contoh nilai tidak ada di kode/test, pakai nilai dummy yang jelas palsu (`"budi@contoh.com"`, `123`) tetapi **nama field harus asli**.
 
-### 2.5 Fallback visual
+### 2.5 Fallback visual (HANYA setelah eksekusi capture benar-benar dicoba dan gagal)
 
-Jika screenshot gagal (server butuh secret/DB, build error, tidak ada simulator):
+Jika screenshot gagal setelah benar-benar dijalankan (server butuh secret/DB, compile error, tidak ada tool capture):
 1. Jangan habiskan lebih dari **2 percobaan** per metode.
-2. Buat diagram Mermaid yang menggambarkan struktur komponen (`flowchart TD` parent → child + props penting).
-3. Tambahkan catatan di README:
+2. Buat diagram Mermaid yang menggambarkan struktur komponen & alur props/state nyata (`flowchart TD`, minimal 3 node bermakna).
+3. Tambahkan catatan di README berisi **error nyata dari terminal** (DILARANG menulis alasan generik seperti `"simulator tidak aktif"` untuk Flutter):
    ```markdown
-   > 📸 Screenshot belum tersedia: <alasan singkat>. Jalankan ulang skill setelah <syarat> terpenuhi.
+   > 📸 Screenshot belum tersedia: <ringkasan error nyata saat menjalankan capture>. Jalankan ulang skill setelah <syarat> terpenuhi.
    ```
 4. Catat alasan kegagalan untuk laporan akhir.
 
