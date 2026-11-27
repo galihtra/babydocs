@@ -229,7 +229,9 @@ Semua gambar disimpan di `<FolderDok>/assets/<nama-kebab-case>.png` dan di-embed
 
 Alt text wajib mendeskripsikan isi gambar dalam bahasa sederhana.
 
-#### A. `web-ui` (React, Next.js, Vue, Nuxt, Svelte, Angular, Astro, HTML statis, dll.)
+#### A. `web-ui` (semua aplikasi web: SPA, SSR, maupun server-rendered)
+
+Berlaku untuk React, Next.js, Vue, Nuxt, Svelte, Angular, Astro, **Laravel (Blade/Livewire/Inertia)**, **Rails (ERB/Hotwire)**, **Django/Flask (Jinja)**, **ASP.NET (Blazor/Razor)**, **Phoenix LiveView**, **Go Templ**, **Spring Thymeleaf**, **Rust (Leptos/Yew/Dioxus/Tauri)**, **Streamlit/Gradio**, hingga HTML statis.
 
 1. **Siapkan Playwright** (sekali saja):
    ```bash
@@ -237,11 +239,11 @@ Alt text wajib mendeskripsikan isi gambar dalam bahasa sederhana.
    npx -y playwright install chromium
    ```
    Jika Playwright MCP tersedia di environment-mu, kamu BOLEH memakainya sebagai pengganti CLI (navigate → screenshot).
-2. **Jalankan dev server** sebagai proses latar belakang menggunakan perintah dari Peta Proyek (`npm run dev`, `pnpm dev`, `yarn dev`, `ng serve`, `php artisan serve`, `python manage.py runserver`, dll.). Untuk HTML statis: `npx -y serve -l 4173 .` atau `python3 -m http.server 4173`.
-3. **Tunggu server siap**: cek URL (mis. `http://localhost:3000`) berulang tiap 2 detik, maksimum 90 detik. Baca port aktual dari log server — jangan menebak.
+2. **Jalankan dev server** sebagai proses latar belakang sesuai stack proyek (mis. `php artisan serve`, `rails server`, `python manage.py runserver`, `dotnet run`, `mix phx.server`, `go run .`, `cargo run`, `mvn spring-boot:run`, `streamlit run app.py`, `npm run dev`, dll.). Untuk HTML statis: `python3 -m http.server 4173`.
+3. **Tunggu server siap**: cek URL (mis. `http://localhost:3000` atau port dari log server) berulang tiap 2 detik, maksimum 90 detik. Baca port aktual dari log — jangan menebak.
 4. **Tentukan target screenshot** per Folder Dok:
-   - Folder halaman/route (`pages/`, `app/`, `views/`, `routes/`) → screenshot halaman di URL route tersebut.
-   - Folder komponen (`components/`, `ui/`, `widgets/`) → jika ada **Storybook**, gunakan `http://localhost:6006/iframe.html?id=<story-id>&viewMode=story`. Jika tidak ada, cari halaman yang memakai komponen tersebut dan ambil screenshot **elemen**-nya saja.
+   - Folder halaman/template/view (`pages/`, `app/`, `views/`, `templates/`, `resources/views/`, `routes/`) → screenshot halaman di URL route tersebut.
+   - Folder komponen (`components/`, `ui/`, `widgets/`, `partials/`, `live/`) → jika ada **Storybook** / **Lookbook** / preview route, pakai itu. Jika tidak ada, cari halaman yang memakai komponen tersebut dan ambil screenshot **elemen**-nya saja.
    - Maksimal **4 screenshot per folder** (pilih yang paling mewakili).
 5. **Ambil screenshot halaman penuh**:
    ```bash
@@ -271,44 +273,22 @@ Alt text wajib mendeskripsikan isi gambar dalam bahasa sederhana.
 7. **Halaman yang butuh login/data**: jika ada akun demo/seed di README lama atau `.env.example`, kamu boleh login lewat script di atas. **Jangan pernah** memasukkan kredensial asli user ke dokumentasi atau screenshot. Jika tidak bisa diakses → pakai fallback (2.5).
 8. Setelah semua screenshot selesai, **matikan dev server**.
 
-#### B. `mobile-ui` (Flutter, React Native, Expo, Android native, iOS native, .NET MAUI)
+#### B. `mobile-ui` (Android Kotlin/Java, iOS SwiftUI/UIKit, .NET MAUI, React Native/Expo, Flutter, serta GUI desktop)
 
-Pilih metode pertama yang berhasil, berurutan:
+Pilih metode pertama yang cocok dengan stack proyek dan berhasil:
 
-1. **Flutter → golden test (diutamakan, tidak perlu simulator):**
-   - Buat file sementara `test/babydocs_shots/<nama>_babydocs_test.dart`:
-     ```dart
-     import 'package:flutter/material.dart';
-     import 'package:flutter_test/flutter_test.dart';
-     // import 'package:<nama_package>/<path_ke_widget>.dart';
-
-     void main() {
-       testWidgets('eli5 <NamaWidget>', (tester) async {
-         tester.view.physicalSize = const Size(1080, 1920);
-         tester.view.devicePixelRatio = 3.0;
-         await tester.pumpWidget(
-           const MaterialApp(
-             debugShowCheckedModeBanner: false,
-             home: Scaffold(body: Center(child: /* NamaWidget(...) dengan data contoh */ SizedBox())),
-           ),
-         );
-         await tester.pumpAndSettle();
-         await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/<nama>.png'));
-       });
-     }
-     ```
-   - Jalankan: `flutter test --update-goldens test/babydocs_shots/`
-   - Salin `test/babydocs_shots/goldens/<nama>.png` → `<FolderDok>/assets/<nama>.png`.
-   - Jika widget butuh Provider/Bloc/Riverpod/GetX/dependency injection, bungkus dengan provider berisi data dummy. Jika terlalu rumit (>30 baris setup), lewati ke metode berikutnya.
-   - Catatan: golden test default merender teks sebagai kotak. Jika package `golden_toolkit` sudah ada di `dev_dependencies`, panggil `await loadAppFonts();` di awal. Jangan menambah dependensi baru tanpa izin user.
-   - **Hapus seluruh folder `test/babydocs_shots/`** setelah selesai.
-2. **Simulator/emulator yang sedang berjalan:**
+1. **Simulator / emulator yang sedang berjalan (berlaku untuk semua mobile stack — SwiftUI, Kotlin/Compose, .NET MAUI, React Native, Flutter):**
    - iOS: `xcrun simctl io booted screenshot "<FolderDok>/assets/<nama>.png"`
    - Android: `adb exec-out screencap -p > "<FolderDok>/assets/<nama>.png"`
-   - Jalankan aplikasi dulu (`flutter run -d <device>`, `npx expo start --ios`, `npx react-native run-android`), navigasikan ke layar target (deep link jika tersedia: `xcrun simctl openurl booted <scheme>://<path>` / `adb shell am start -W -a android.intent.action.VIEW -d "<scheme>://<path>"`).
-   - Jangan menyalakan simulator baru jika memakan waktu > 3 menit; gunakan fallback.
-3. **Expo/React Native Web**: jika proyek mendukung web (`react-native-web` / `expo start --web`), perlakukan seperti `web-ui` dengan viewport `390,844`.
-4. Jika semua gagal → fallback (2.5).
+   - Jalankan aplikasi sesuai stack (`xcodebuild`/Xcode, `./gradlew installDebug`, `dotnet build -t:Run`, `npx expo start`, `flutter run`), navigasikan ke layar target (pakai deep link jika tersedia: `xcrun simctl openurl booted <scheme>://<path>` atau `adb shell am start -W -a android.intent.action.VIEW -d "<scheme>://<path>"`).
+   - Jangan menyalakan simulator baru jika memakan waktu > 3 menit; lanjut ke metode berikutnya atau fallback.
+2. **Snapshot / golden / UI preview test (tanpa perlu simulator penuh):**
+   - **Android (Compose/XML)**: gunakan Paparazzi / Roborazzi / Screenshot Testing jika sudah terpasang di Gradle.
+   - **iOS (SwiftUI/UIKit)**: gunakan `swift-snapshot-testing` jika sudah ada di proyek.
+   - **Flutter**: buat golden test sementara di `test/babydocs_shots/<nama>_babydocs_test.dart`, jalankan `flutter test --update-goldens test/babydocs_shots/`, salin PNG ke `<FolderDok>/assets/`, lalu **hapus seluruh folder `test/babydocs_shots/`**.
+   - Jangan menambah dependensi baru ke proyek tanpa izin user.
+3. **Web / desktop target**: jika proyek mendukung target web (`react-native-web`, `expo start --web`, Tauri/Electron/Wails), perlakukan seperti `web-ui` dengan viewport sesuai target (`390,844` untuk mobile, `1280,800` untuk desktop).
+4. Jika semua tidak memungkinkan → fallback (2.5).
 
 #### C. `backend-api`, `cli-library`, dan folder logika non-UI
 

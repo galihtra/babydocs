@@ -151,7 +151,7 @@ def cmd_serve(a) -> int:
     except OSError:
         pass
     print()
-    print(c("1;35", "  🧸 babydocs") + c("2", f"  v{VERSION}"))
+    print(c("1;35", "  🪆 babydocs") + c("2", f"  v{VERSION}"))
     print()
     print(f"  {c('2', 'Lokal  :')} {c('1;36', url)}")
     if a.host in ("0.0.0.0", "") and lan:
@@ -176,19 +176,31 @@ def cmd_serve(a) -> int:
 # init
 # --------------------------------------------------------------------------
 def project_name(root: Path) -> str:
-    pj = root / "package.json"
-    if pj.exists():
-        try:
-            n = json.loads(pj.read_text(encoding="utf-8")).get("name")
-            if n:
-                return n
-        except ValueError:
-            pass
-    ps = root / "pubspec.yaml"
-    if ps.exists():
-        m = re.search(r"^name:\s*([\w-]+)", ps.read_text(encoding="utf-8", errors="ignore"), re.M)
-        if m:
-            return m.group(1)
+    for fname in ("package.json", "composer.json"):
+        p = root / fname
+        if p.exists():
+            try:
+                n = json.loads(p.read_text(encoding="utf-8")).get("name")
+                if n:
+                    return str(n).split("/")[-1]
+            except ValueError:
+                pass
+    for fname, rx in [
+        ("pubspec.yaml", r"^name:\s*['\"]?([\w.-]+)"),
+        ("Cargo.toml", r'^name\s*=\s*"([\w.-]+)"'),
+        ("pyproject.toml", r'^name\s*=\s*["\']([\w.-]+)["\']'),
+        ("go.mod", r"^module\s+\S+/([\w.-]+)"),
+        ("mix.exs", r"app:\s*:([\w_]+)"),
+        ("pom.xml", r"<artifactId>([\w.-]+)</artifactId>"),
+    ]:
+        p = root / fname
+        if p.exists():
+            m = re.search(rx, p.read_text(encoding="utf-8", errors="ignore")[:4000], re.M)
+            if m:
+                return m.group(1)
+    csprojs = list(root.glob("*.csproj"))
+    if csprojs:
+        return csprojs[0].stem
     return root.name
 
 
@@ -282,14 +294,15 @@ def cmd_check(a) -> int:
 # doctor
 # --------------------------------------------------------------------------
 def cmd_doctor() -> int:
-    print(c("1;35", f"\n  🧸 babydocs doctor  v{VERSION}\n"))
+    print(c("1;35", f"\n  🪆 babydocs doctor  v{VERSION}\n"))
     py_ver = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-    print(c("32", f"  ✓ Runtime siap") + c("2", f" (Python {py_ver})"))
-    print(c("32", f"  ✓ Folder babydocs") + c("2", f" ({HOME})"))
+    print(c("32", "  ✓ Runtime siap") + c("2", f" (Python {py_ver})"))
+    print(c("32", "  ✓ Folder babydocs") + c("2", f" ({HOME})"))
     for label, cmd, note in [
-        ("Git", "git", "opsional — mempercepat scan & update"),
-        ("Node.js (npx)", "npx", "opsional — untuk screenshot halaman web"),
-        ("Flutter", "flutter", "opsional — untuk screenshot aplikasi Flutter"),
+        ("Git", "git", "opsional — mempercepat scan & mode update"),
+        ("Web capture (npx/Playwright)", "npx", "opsional — screenshot aplikasi web"),
+        ("Android capture (adb)", "adb", "opsional — screenshot emulator/perangkat Android"),
+        ("iOS capture (xcrun)", "xcrun", "opsional — screenshot Simulator iOS di macOS"),
     ]:
         if shutil.which(cmd):
             print(c("32", f"  ✓ {label} tersedia"))
@@ -306,7 +319,7 @@ def main() -> int:
         runpy.run_path(str(SCAN), run_name="__main__")
         return 0
 
-    ap = argparse.ArgumentParser(prog="babydocs", description="🧸 babydocs — dokumentasi ELI5")
+    ap = argparse.ArgumentParser(prog="babydocs", description="🪆 babydocs — dokumentasi ELI5")
     sub = ap.add_subparsers(dest="cmd")
     s = sub.add_parser("serve", help="buka web dokumentasi secara lokal")
     s.add_argument("dir", nargs="?", default=".")

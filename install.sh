@@ -151,7 +151,7 @@ link_agent_skills() {
 }
 
 echo ""
-echo "  🧸 Memasang babydocs…"
+echo "  🪆 Memasang babydocs…"
 echo ""
 
 ensure_python

@@ -1,171 +1,140 @@
-# 🧸 babydocs
+# 🪆 babydocs
 
-**Agent Skill universal** yang mengubah seluruh codebase (bahasa & framework apa pun) menjadi **web dokumentasi interaktif** ala Swagger/Docsify — dijelaskan dengan gaya **ELI5** (analogi sehari-hari, bahasa super sederhana), dilengkapi **visual otomatis**, dan terstruktur **per folder**.
+An agent skill and CLI that turns any codebase into browsable, folder-by-folder web documentation written in plain language.
 
-```
-Kode rumit  ──►  🤖 Agent + skill ini  ──►  📚 Web docs yang bisa dibaca nenekmu
-```
+Every folder gets a `README.md` that explains what the code does using everyday analogies, anchored to the real file names, functions, routes, and props underneath. UI folders get automatic screenshots; backend, CLI, and logic folders get flowcharts and real input/output examples.
 
-## ✨ Fitur
+## Install
 
-| Fitur | Penjelasan |
-|---|---|
-| 🔍 Auto-detect stack | Baca `package.json`, `pubspec.yaml`, `go.mod`, `*.csproj`, `requirements.txt`, `Cargo.toml`, dll. lalu tentukan tipe: `web-ui`, `mobile-ui`, `backend-api`, `cli-library` |
-| 🧸 Gaya ELI5 + akurat | Setiap analogi wajib diikuti baris `🔧 Aslinya:` berisi nama file/fungsi/props asli |
-| 📸 Visual otomatis | Web → screenshot Playwright · Mobile → golden test / simulator · Backend/CLI → diagram Mermaid + contoh input/output |
-| 📂 Per folder, bottom-up | `README.md` di tiap folder fitur, lalu dirangkum ke atas |
-| 🌐 Web tanpa build | `index.html` Docsify + `_sidebar.md` + Search + Copy Code + Mermaid, siap GitHub Pages |
-| ♻️ Aman & bisa diulang | Tidak menyentuh source code; konten dibungkus penanda sehingga README buatan manusia tidak tertimpa |
+No manual Python or `PATH` setup required. The installer checks your machine, installs a standalone Python runtime if none is found, puts `babydocs` on your `PATH`, and links the skill to any installed coding agent (`~/.gemini/antigravity/skills`, `~/.claude/skills`, `~/.gemini/skills`).
 
-## 📁 Struktur Repo
-
-```
-babydocs/
-├── SKILL.md                            # Instruksi utama untuk AI agent
-├── README.md                           # File ini
-├── install.sh                          # Installer 1-langkah macOS/Linux (auto-install Python + PATH + link skill)
-├── install.ps1                         # Installer 1-langkah Windows (PowerShell)
-├── install.bat                         # Klik dua kali untuk pengguna Windows
-├── bin/
-│   ├── babydocs                        # Launcher macOS/Linux (auto-install Python jika belum ada)
-│   └── babydocs.cmd                    # Launcher Windows (auto-install Python jika belum ada)
-├── scripts/
-│   ├── cli.py                          # CLI: serve, init, check, scan, doctor
-│   └── scan.py                         # Scanner cepat: stack + peta folder + kerangka kode
-└── templates/
-    ├── index.html                      # Docsify (Search, Copy Code, Mermaid, Zoom)
-    ├── folder-readme-template.md       # Template README per sub-folder
-    ├── root-readme-template.md         # Template halaman depan
-    └── _sidebar-template.md            # Contoh format sidebar
-```
-
-## 📦 Instalasi (1 Langkah — Otomatis untuk Pemula)
-
-Tidak perlu install Python atau setting `PATH` manual. Installer akan mengecek sistemmu, memasang kebutuhan yang kurang secara otomatis, mendaftarkan perintah `babydocs`, dan menghubungkan skill ke coding agent yang sudah terpasang.
-
-### macOS / Linux
+**macOS / Linux:**
 
 ```bash
-git clone <url-repo-ini> ~/babydocs
+git clone <repo-url> ~/babydocs
 cd ~/babydocs
 ./install.sh
 ```
 
-### Windows
+**Windows:**
 
-1. Download / clone repo ini.
-2. **Klik dua kali `install.bat`** (atau jalankan `.\install.ps1` di PowerShell).
-3. Tutup lalu buka ulang terminal.
+Clone or download this repository, then double-click `install.bat` (or run `.\install.ps1` in PowerShell). Reopen your terminal afterwards.
 
-> Installer otomatis menghubungkan skill ke **Antigravity** (`~/.gemini/antigravity/skills`), **Claude Code** (`~/.claude/skills`), dan **Gemini CLI** (`~/.gemini/skills`) jika foldernya terdeteksi.
->
-> Untuk agent lain (Codex, Cursor, dll.), cukup arahkan ke folder ini atau tulis: *"ikuti instruksi di `~/babydocs/SKILL.md`"*.
-
-Cek apakah semuanya sudah siap:
+Check that everything is ready:
 
 ```bash
 babydocs doctor
 ```
 
-## 🚀 Cara Memanggil
+If you use another coding agent (Codex, Cursor, etc.), point it to `~/babydocs/SKILL.md`.
 
-Buka proyek yang ingin didokumentasikan di coding agent, lalu ketik salah satu:
+## Usage
+
+Open any project in your coding agent and invoke the skill:
 
 ```text
 /babydocs
 ```
 
-```text
-Pakai skill babydocs untuk mendokumentasikan seluruh codebase ini.
-```
+You can also scope or update it:
 
 ```text
-Jalankan babydocs, tapi hanya untuk folder src/features/payment.
+Run babydocs only for internal/payments
+Update babydocs for changes since the last commit
 ```
 
-```text
-Update dokumentasi babydocs untuk perubahan sejak commit terakhir.
-```
-
-Agent akan menjalankan:
-
-```mermaid
-flowchart LR
-    f1["Fase 1: Deteksi stack & peta folder"] --> f2["Fase 2: README per folder (bottom-up) + visual"]
-    f2 --> f3["Fase 3: README root, _sidebar.md, index.html"]
-    f3 --> f4["Fase 4: Verifikasi tautan, gambar, Mermaid"]
-```
-
-## ⚡ Kenapa Cepat di Codebase Besar
-
-Agent **tidak** membuka file satu per satu. Alurnya begini:
-
-1. **Scanner satu perintah**: `scripts/scan.py` (hanya Python standard library, tidak perlu install apa-apa) menghasilkan *Peta Proyek* berisi stack, Folder Dok yang sudah diurutkan bottom-up, dan **kerangka** tiap file (class/fungsi/export, route API, import lokal, jumlah baris, tanda UI). Di proyek ±700 file / 110 ribu baris, scanner selesai dalam beberapa detik.
-2. **Baca bertingkat**: file kecil/DTO cukup dari kerangka, file sedang dibaca utuh sekali, file besar hanya bagian yang dicari dengan `grep`.
-3. **Lewati yang tidak berubah**: setiap README menyimpan `<!-- babydocs:hash=... -->`. Saat skill dijalankan ulang, folder yang hash-nya cocok langsung dilewati.
-4. **Kerja paralel**: kalau agent-mu mendukung sub-agent, tiap sub-pohon besar (mis. `src/modules/auth`) dikerjakan sub-agent terpisah secara bersamaan.
-
-Coba scanner-nya langsung:
+Once generated, preview the docs locally:
 
 ```bash
-babydocs scan /path/ke/proyek --out /tmp/peta.md
-babydocs scan /path/ke/proyek --only src/features --json
+cd /path/to/your-project
+babydocs serve --open
 ```
 
-## 🧰 Dependensi Opsional
+The local server runs on `http://localhost:3000` with live reload. If your project already has its own `index.html`, `babydocs` writes `docs.html` instead and serves that automatically.
 
-Tidak ada dependensi wajib. Visual dipilih otomatis; jika alat tidak tersedia, skill jatuh ke diagram Mermaid.
+To publish on GitHub Pages, commit the generated files (`index.html`, `_sidebar.md`, `.nojekyll`, `README.md`, `assets/`) and enable **Settings → Pages → Deploy from a branch → `/ (root)`**.
 
-| Untuk | Alat | Instalasi |
-|---|---|---|
-| Scanner cepat (disarankan) | Python 3.8+ | biasanya sudah ada di macOS/Linux |
-| Screenshot web | [Playwright](https://playwright.dev) (CLI atau MCP) | `npx playwright install chromium` |
-| Screenshot Flutter | Flutter SDK (golden test) | sudah termasuk `flutter_test` |
-| Screenshot iOS | Xcode + Simulator | `xcrun simctl` |
-| Screenshot Android | Android SDK Platform Tools | `adb` |
-| Preview docs | Python 3.8+ | `babydocs serve` (sudah termasuk) |
-| Validasi Mermaid (opsional) | `@mermaid-js/mermaid-cli` | `npx @mermaid-js/mermaid-cli` |
+## CLI commands
 
-## 💻 Perintah `babydocs`
-
-| Perintah | Fungsi |
+| Command | Description |
 |---|---|
-| `babydocs serve` | Buka web dokumentasi di `http://localhost:3000` (live reload otomatis) |
-| `babydocs serve --open` | Sama, sekaligus membuka browser |
-| `babydocs serve -p 8080` | Pakai port lain (jika port terpakai, otomatis pindah ke port berikutnya) |
-| `babydocs serve --host 0.0.0.0` | Bisa dibuka dari HP/laptop lain di Wi-Fi yang sama |
-| `babydocs init` | Pasang `index.html` + `.nojekyll` di proyek |
-| `babydocs check` | Cek link sidebar, gambar, placeholder yang tertinggal |
-| `babydocs scan` | Buat Peta Proyek (dipakai agent) |
-| `babydocs doctor` | Cek kesiapan sistem (runtime, git, alat screenshot opsional) |
+| `babydocs serve [dir]` | Serve the docs locally with live reload (`-p PORT`, `--open`, `--host 0.0.0.0`, `--no-reload`) |
+| `babydocs init [dir]` | Write `index.html` (or `docs.html`) and `.nojekyll` into a project |
+| `babydocs scan [dir]` | Generate a compact project map (`--only PATH`, `--json`, `--out FILE`) |
+| `babydocs check [dir]` | Verify sidebar links, embedded images, leftover placeholders, and temp files |
+| `babydocs doctor` | Check runtime and optional capture tools |
+| `babydocs version` | Print CLI version |
 
-## 👀 Preview Web Dokumentasi Secara Lokal
+If `babydocs` is invoked on a machine without Python, the launcher automatically runs the runtime installer first.
 
-Setelah skill selesai, di root proyek kamu akan ada `index.html`, `_sidebar.md`, `README.md`, dan `.nojekyll`. Jalankan:
+## Supported languages and frameworks
 
-```bash
-cd /path/ke/proyek
-babydocs serve
-# buka http://localhost:3000
+`babydocs` detects the stack from project config files and picks the visual adapter per folder:
+
+| Ecosystem | Examples detected | Visual adapter |
+|---|---|---|
+| Go | Gin, Echo, Fiber, Chi, Templ, Cobra, Bubbletea | Mermaid diagrams (or web capture for Templ) |
+| Python | FastAPI, Flask, Django, Litestar, Streamlit, Gradio, Typer, Click | Mermaid diagrams; web capture for templates/UI |
+| Rust | Axum, Actix, Rocket, Warp, Leptos, Yew, Dioxus, Tauri, Clap | Mermaid diagrams; web capture for UI |
+| Java / Kotlin | Spring Boot, Quarkus, Micronaut, Ktor, Thymeleaf, Android | Mermaid diagrams; web or emulator capture for UI |
+| C# / .NET | ASP.NET Core, Blazor, Razor Pages, MAUI | Mermaid diagrams; web or simulator capture for UI |
+| PHP | Laravel, Livewire, Inertia, Symfony, CodeIgniter | Mermaid diagrams; web capture for Blade/Twig |
+| Ruby | Rails, ViewComponent, Sinatra, Hanami | Mermaid diagrams; web capture for views |
+| Elixir | Phoenix, LiveView | Mermaid diagrams; web capture for LiveView |
+| Swift | SwiftUI, UIKit, Vapor | Simulator capture for UI; Mermaid for Vapor/libs |
+| JavaScript / TypeScript | React, Next.js, Vue, Nuxt, Svelte, Angular, Astro, NestJS, Express, Fastify, Hono, React Native | Web/simulator capture for UI; Mermaid for APIs/logic |
+| Dart | Flutter, Shelf, Dart Frog | Simulator/golden capture for UI; Mermaid for logic |
+| C / C++ / Zig / Scala / Lua | CMake, Meson, `build.zig`, `build.sbt`, scripts | Mermaid diagrams |
+
+Projects with no recognized manifest fall back to file-extension detection and Mermaid diagrams. Monorepos are classified per package.
+
+## How it stays fast on large codebases
+
+Instead of opening hundreds of files one by one, the skill runs `babydocs scan` first. In a single pass (using Python's standard library), it extracts:
+
+- Stack, scripts, and bottom-up folder order
+- Per-file skeletons: exported symbols, classes, functions, HTTP routes, local imports, line counts, and UI hints
+- Content hashes per folder, compared against `<!-- babydocs:hash=... -->` in existing READMEs so unchanged folders are skipped on re-runs
+
+The agent reads files in tiers (skeleton-only for small files/DTOs, full read for medium files, targeted grep for files over 400 lines) and splits large trees across parallel sub-agents when supported.
+
+## Optional tools
+
+Nothing extra is required—if a screenshot tool is missing, `babydocs` falls back to Mermaid component diagrams.
+
+- **Web screenshots:** Playwright (`npx playwright install chromium`) or Playwright MCP
+- **Android screenshots:** `adb` (Android SDK Platform Tools)
+- **iOS screenshots:** `xcrun simctl` (Xcode on macOS)
+- **Flutter widget snapshots:** `flutter test`
+
+## Guarantees
+
+- Source code is never modified. Only `README.md`, `assets/*.png`, `_sidebar.md`, `index.html`/`docs.html`, and `.nojekyll` are written.
+- Generated sections are wrapped in `<!-- babydocs:start -->` … `<!-- babydocs:end -->`, so hand-written README content is preserved on updates.
+- Temporary capture scripts and snapshot tests are deleted after each run.
+
+## Repository layout
+
+```text
+babydocs/
+├── SKILL.md
+├── README.md
+├── install.sh
+├── install.ps1
+├── install.bat
+├── bin/
+│   ├── babydocs
+│   └── babydocs.cmd
+├── scripts/
+│   ├── cli.py
+│   └── scan.py
+└── templates/
+    ├── index.html
+    ├── folder-readme-template.md
+    ├── root-readme-template.md
+    └── _sidebar-template.md
 ```
 
-> ⚠️ Jangan buka `index.html` dengan klik dua kali (`file://`) — dokumentasi harus dibuka lewat `babydocs serve` atau GitHub Pages.
->
-> Jika proyek sudah punya `index.html` sendiri (mis. Vite), skill membuat `docs.html` sebagai gantinya — `babydocs serve` otomatis membuka halaman yang benar.
-
-### Publikasi ke GitHub Pages
-
-1. Commit & push `index.html`, `_sidebar.md`, `.nojekyll`, semua `README.md` dan folder `assets/`.
-2. GitHub → **Settings → Pages → Build and deployment → Deploy from a branch** → pilih branch dan folder `/ (root)`.
-3. Buka `https://<user>.github.io/<repo>/`.
-
-## 🛡️ Jaminan Keamanan
-
-- Tidak pernah mengubah source code — hanya `README.md`, `assets/*.png`, `_sidebar.md`, `index.html`/`docs.html`, `.nojekyll`.
-- File sementara (script screenshot, golden test) dihapus otomatis.
-- Konten buatan skill dibungkus `<!-- babydocs:start -->` … `<!-- babydocs:end -->`, sehingga isi README yang ditulis manusia tetap aman saat skill dijalankan ulang.
-- Kredensial asli tidak pernah dimasukkan ke dokumentasi atau screenshot.
-
-## 📝 Lisensi
+## License
 
 MIT

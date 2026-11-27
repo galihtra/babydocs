@@ -15,7 +15,7 @@
 
 ---
 
-## 🧸 Penjelasan Super Sederhana
+## 🪆 Penjelasan Super Sederhana
 
 {{ANALOGI_BESAR — 3 s.d. 6 kalimat pendek. Satu dunia analogi untuk seluruh folder.}}
 

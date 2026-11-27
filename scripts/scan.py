@@ -56,7 +56,9 @@ SOURCE_EXT = {
     ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".vue", ".svelte", ".astro",
     ".py", ".go", ".dart", ".rs", ".cs", ".java", ".kt", ".kts", ".php",
     ".rb", ".swift", ".ex", ".exs", ".c", ".h", ".cpp", ".hpp", ".cc",
-    ".m", ".mm", ".scala", ".lua", ".sh", ".html", ".sql", ".graphql", ".proto",
+    ".m", ".mm", ".scala", ".lua", ".sh", ".zig", ".r", ".R", ".jl",
+    ".html", ".erb", ".heex", ".templ", ".razor", ".cshtml", ".twig", ".xaml",
+    ".sql", ".graphql", ".proto",
 }
 TEST_RE = re.compile(r"(^|/)(tests?|__tests__|spec|e2e|integration_test)(/|$)|"
                      r"(\.|_)(test|spec)\.[a-z]+$|_test\.(go|dart|py)$|^test_.*\.py$")
@@ -120,29 +122,48 @@ def detect_stack(root: Path, files: list[str]) -> dict:
                       "type": "mobile-ui" if flutter else "cli-library"})
 
     simple = [
-        ("go.mod", "Go", [("gin-gonic", "Gin", "backend-api"), ("labstack/echo", "Echo", "backend-api"),
-                          ("gofiber", "Fiber", "backend-api"), ("go-chi", "Chi", "backend-api"),
+        ("go.mod", "Go", [("a-h/templ", "Templ", "web-ui"), ("gin-gonic", "Gin", "backend-api"),
+                          ("labstack/echo", "Echo", "backend-api"), ("gofiber", "Fiber", "backend-api"),
+                          ("go-chi", "Chi", "backend-api"), ("charmbracelet/bubbletea", "Bubbletea", "cli-library"),
                           ("spf13/cobra", "Cobra", "cli-library")]),
         ("Cargo.toml", "Rust", [("axum", "Axum", "backend-api"), ("actix-web", "Actix", "backend-api"),
-                                ("rocket", "Rocket", "backend-api"), ("leptos", "Leptos", "web-ui"),
-                                ("yew", "Yew", "web-ui"), ("tauri", "Tauri", "web-ui"),
+                                ("rocket", "Rocket", "backend-api"), ("warp", "Warp", "backend-api"),
+                                ("poem", "Poem", "backend-api"), ("leptos", "Leptos", "web-ui"),
+                                ("yew", "Yew", "web-ui"), ("dioxus", "Dioxus", "web-ui"),
+                                ("tauri", "Tauri", "web-ui"), ("ratatui", "Ratatui", "cli-library"),
                                 ("clap", "Clap", "cli-library")]),
         ("requirements.txt", "Python", None), ("pyproject.toml", "Python", None),
         ("Pipfile", "Python", None), ("setup.py", "Python", None),
-        ("composer.json", "PHP", [("laravel/framework", "Laravel", "backend-api"),
-                                  ("symfony/", "Symfony", "backend-api")]),
-        ("Gemfile", "Ruby", [("rails", "Rails", "backend-api"), ("sinatra", "Sinatra", "backend-api")]),
+        ("composer.json", "PHP", [("livewire/livewire", "Livewire", "web-ui"),
+                                  ("inertiajs/", "Inertia", "web-ui"),
+                                  ("laravel/framework", "Laravel", "backend-api"),
+                                  ("symfony/", "Symfony", "backend-api"),
+                                  ("codeigniter4/", "CodeIgniter", "backend-api")]),
+        ("Gemfile", "Ruby", [("view_component", "ViewComponent", "web-ui"),
+                             ("rails", "Rails", "backend-api"), ("sinatra", "Sinatra", "backend-api"),
+                             ("hanami", "Hanami", "backend-api")]),
         ("mix.exs", "Elixir", [("phoenix_live_view", "LiveView", "web-ui"), ("phoenix", "Phoenix", "backend-api")]),
-        ("pom.xml", "Java", [("spring-boot", "Spring Boot", "backend-api")]),
+        ("pom.xml", "Java", [("spring-boot-starter-thymeleaf", "Thymeleaf", "web-ui"),
+                             ("spring-boot", "Spring Boot", "backend-api"),
+                             ("quarkus", "Quarkus", "backend-api"),
+                             ("micronaut", "Micronaut", "backend-api")]),
         ("build.gradle", "Java/Kotlin", [("com.android.application", "Android", "mobile-ui"),
-                                         ("spring-boot", "Spring Boot", "backend-api")]),
+                                         ("spring-boot", "Spring Boot", "backend-api"),
+                                         ("io.ktor", "Ktor", "backend-api"),
+                                         ("quarkus", "Quarkus", "backend-api")]),
         ("build.gradle.kts", "Kotlin", [("com.android.application", "Android", "mobile-ui"),
-                                        ("spring-boot", "Spring Boot", "backend-api")]),
-        ("Package.swift", "Swift", []), ("CMakeLists.txt", "C/C++", []),
+                                        ("spring-boot", "Spring Boot", "backend-api"),
+                                        ("io.ktor", "Ktor", "backend-api"),
+                                        ("quarkus", "Quarkus", "backend-api")]),
+        ("Package.swift", "Swift", [("vapor/vapor", "Vapor", "backend-api")]),
+        ("build.zig", "Zig", []), ("build.sbt", "Scala", [("play", "Play", "backend-api")]),
+        ("CMakeLists.txt", "C/C++", [("qt", "Qt", "web-ui")]), ("meson.build", "C/C++", []),
     ]
-    py_rules = [("fastapi", "FastAPI", "backend-api"), ("flask", "Flask", "backend-api"),
-                ("django", "Django", "backend-api"), ("streamlit", "Streamlit", "web-ui"),
-                ("gradio", "Gradio", "web-ui"), ("typer", "Typer", "cli-library"),
+    py_rules = [("streamlit", "Streamlit", "web-ui"), ("gradio", "Gradio", "web-ui"),
+                ("nicegui", "NiceGUI", "web-ui"), ("fastapi", "FastAPI", "backend-api"),
+                ("litestar", "Litestar", "backend-api"), ("starlette", "Starlette", "backend-api"),
+                ("flask", "Flask", "backend-api"), ("django", "Django", "backend-api"),
+                ("tornado", "Tornado", "backend-api"), ("typer", "Typer", "cli-library"),
                 ("click", "Click", "cli-library")]
     for marker, lang, rules in simple:
         for m in has(marker):
@@ -236,21 +257,31 @@ LANG = {
               "route": [], "imp": []},
     "ex": {"sym": [R(r"^\s*defmodule\s+([\w.]+)"), R(r"^\s*def\s+(\w+[?!]?)")],
            "route": [R(r"^\s*(get|post|put|patch|delete|live|resources)\s+\"([^\"]+)")], "imp": []},
+    "c": {"sym": [R(r"^(?:static\s+|inline\s+|extern\s+)*[\w*]+\s+(\w+)\s*\([^;]*\)\s*\{"),
+                  R(r"^(?:typedef\s+)?(?:struct|enum|class)\s+(\w+)")],
+          "route": [], "imp": [R(r'^#include\s+"([^"]+)"')]},
+    "zig": {"sym": [R(r"^\s*(?:pub\s+)?fn\s+(\w+)"), R(r"^\s*pub\s+const\s+(\w+)\s*=")],
+            "route": [], "imp": [R(r'@import\("([^"]+)"\)')]},
+    "lua": {"sym": [R(r"^(?:local\s+)?function\s+([\w.:]+)")],
+            "route": [], "imp": [R(r"""require\s*\(?\s*['"]([^'"]+)['"]""")]},
 }
 EXT_LANG = {".js": "js", ".jsx": "js", ".ts": "js", ".tsx": "js", ".mjs": "js", ".cjs": "js",
             ".vue": "js", ".svelte": "js", ".astro": "js", ".py": "py", ".go": "go",
             ".dart": "dart", ".rs": "rs", ".cs": "cs", ".java": "jvm", ".kt": "jvm",
             ".kts": "jvm", ".scala": "jvm", ".php": "php", ".rb": "rb", ".swift": "swift",
-            ".ex": "ex", ".exs": "ex"}
+            ".ex": "ex", ".exs": "ex", ".c": "c", ".h": "c", ".cpp": "c", ".hpp": "c",
+            ".cc": "c", ".zig": "zig", ".lua": "lua"}
+TEMPLATE_UI_EXT = {".erb", ".heex", ".templ", ".razor", ".cshtml", ".twig", ".xaml", ".vue", ".svelte", ".astro"}
 UI_HINT = {
     "jsx": re.compile(r"(<[A-Z]\w*[\s/>]|return\s*\(\s*<|<template>|<div[\s>]|JSX\.Element|React\.FC|StyleSheet\.create)"),
     "dart": re.compile(r"(extends\s+(?:Stateless|Stateful|Consumer|Hook|ConsumerStateful)Widget|Widget\s+build\s*\()"),
     "jvm": re.compile(r"@Composable"),
     "swift": re.compile(r"(some\s+View\b|UIViewController)"),
-    "py": re.compile(r"(\bst\.\w+\(|gr\.Blocks|render_template\()"),
+    "py": re.compile(r"(\bst\.\w+\(|gr\.Blocks|render_template\(|render\s*\(\s*request)"),
+    "php": re.compile(r"(return\s+view\(|@extends\(|@section\()"),
 }
 UI_EXT = {".jsx": "jsx", ".tsx": "jsx", ".vue": "jsx", ".svelte": "jsx", ".astro": "jsx",
-          ".html": "jsx", ".dart": "dart", ".kt": "jvm", ".swift": "swift", ".py": "py"}
+          ".html": "jsx", ".dart": "dart", ".kt": "jvm", ".swift": "swift", ".py": "py", ".php": "php"}
 
 
 def short_import(s: str) -> str:
@@ -262,8 +293,10 @@ def short_import(s: str) -> str:
 def skeleton(path: Path, max_symbols: int) -> dict:
     txt = read(path)
     lines = txt.count("\n") + (1 if txt and not txt.endswith("\n") else 0)
-    info = {"loc": lines, "symbols": [], "routes": [], "imports": [], "ui": False}
-    lang = EXT_LANG.get(path.suffix.lower())
+    suf = path.suffix.lower()
+    is_tpl_ui = suf in TEMPLATE_UI_EXT or path.name.endswith(".blade.php")
+    info = {"loc": lines, "symbols": [], "routes": [], "imports": [], "ui": is_tpl_ui}
+    lang = EXT_LANG.get(suf)
     if not lang:
         return info
     rules = LANG[lang]
@@ -284,8 +317,8 @@ def skeleton(path: Path, max_symbols: int) -> dict:
     info["imports"] = sorted({short_import(m.group(1)) for rx in rules["imp"] for m in rx.finditer(txt)})
     if len(info["imports"]) > 10:
         info["imports"] = info["imports"][:10] + [f"+{len(info['imports']) - 10} lagi"]
-    ui_rx = UI_HINT.get(UI_EXT.get(path.suffix.lower(), ""))
-    info["ui"] = bool(ui_rx and ui_rx.search(txt))
+    ui_rx = UI_HINT.get(UI_EXT.get(suf, ""))
+    info["ui"] = is_tpl_ui or bool(ui_rx and ui_rx.search(txt))
     return info
 
 # --------------------------------------------------------------------------
