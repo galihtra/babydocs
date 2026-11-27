@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<!-- generated-by: eli5-visual-docs -->
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
+  <meta name="description" content="Dokumentasi {{PROJECT_NAME}} — dijelaskan dengan bahasa sederhana" />
+  <title>{{PROJECT_NAME}} · Docs</title>
+
+  <!-- Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" />
+  <!-- Tema bersih & modern -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css" />
+
+  <style>
+    :root {
+      --theme-color: #4f46e5;
+      --base-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --base-font-size: 16px;
+      --base-line-height: 1.7;
+      --content-max-width: 60rem;
+      --sidebar-width: 18rem;
+      --sidebar-nav-link-font-weight--active: 600;
+      --code-font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+      --code-font-size: 0.875em;
+      --code-theme-background: #f6f8fa;
+      --blockquote-background: #eef2ff;
+      --blockquote-border-color: #4f46e5;
+      --blockquote-border-width: 0 0 0 4px;
+      --blockquote-padding: 0.75em 1em;
+      --table-cell-padding: 0.5em 0.9em;
+      --table-head-background: #f3f4f6;
+      --search-margin: 0.5rem 0 1rem;
+    }
+    .markdown-section img {
+      max-width: 100%;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+    .markdown-section .mermaid {
+      display: flex;
+      justify-content: center;
+      margin: 1.5em 0;
+      padding: 1em;
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+    .markdown-section table { display: table; width: 100%; }
+    .markdown-section h1 { font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="app">Memuat dokumentasi…</div>
+
+  <script>
+    window.$docsify = {
+      name: "{{PROJECT_NAME}}",
+      repo: "{{REPO_URL}}",
+      loadSidebar: true,
+      subMaxLevel: 3,
+      maxLevel: 4,
+      auto2top: true,
+      relativePath: false,
+      homepage: "README.md",
+      // Semua halaman memakai satu _sidebar.md di root
+      alias: {
+        "/.*/_sidebar.md": "/_sidebar.md"
+      },
+      notFoundPage: true,
+
+      // Plugin: Search
+      search: {
+        maxAge: 86400000,
+        paths: "auto",
+        placeholder: "🔍 Cari…",
+        noData: "Tidak ditemukan 😢",
+        depth: 3,
+        hideOtherSidebarContent: false
+      },
+
+      // Plugin: Copy Code
+      copyCode: {
+        buttonText: "Salin",
+        errorText: "Gagal",
+        successText: "Tersalin ✓"
+      },
+
+      // Ubah blok ```mermaid menjadi diagram
+      markdown: {
+        renderer: {
+          code: function (code, lang) {
+            if (lang === "mermaid") {
+              var escaped = String(code)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+              return '<div class="mermaid">' + escaped + "</div>";
+            }
+            return this.origin.code.apply(this, arguments);
+          }
+        }
+      },
+
+      plugins: [
+        function (hook) {
+          hook.doneEach(function () {
+            if (!window.mermaid) return;
+            var nodes = document.querySelectorAll(".markdown-section .mermaid:not([data-processed])");
+            if (nodes.length) {
+              window.mermaid.run({ nodes: nodes }).catch(function (err) {
+                console.error("Mermaid error:", err);
+              });
+            }
+          });
+        }
+      ]
+    };
+  </script>
+
+  <!-- Docsify core -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <!-- Tema (JS pendukung) -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+
+  <!-- Plugin: Search -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <!-- Plugin: Copy Code -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@3"></script>
+  <!-- Plugin: Zoom gambar (klik screenshot untuk memperbesar) -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+
+  <!-- Syntax highlight bahasa populer -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-jsx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-tsx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-dart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-rust.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-csharp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-kotlin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup-templating.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-php.min.js"></script>
+
+  <!-- Plugin: Mermaid.js -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "default",
+      securityLevel: "loose",
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: "basis" },
+      sequence: { useMaxWidth: true }
+    });
+  </script>
+</body>
+</html>
