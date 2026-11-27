@@ -55,7 +55,7 @@ Tujuan: memetakan codebase dengan cepat **tanpa mengorbankan kedalaman analisis*
    - **L3 — Terarah:** untuk file > 400 baris, cari dulu (`rg -n`) deklarasi class, constructor/props, method publik, route, dan `build`/`render`, lalu baca rentang kodenya.
 4. **Lacak pemakaian dengan `rg` / `grep`.** Untuk setiap reusable component/widget, service, atau helper penting, jalankan `rg -l "<NamaSimbol>"` (atau `grep -rl`) untuk mengetahui **dipakai di mana saja** di seluruh proyek.
 5. **DILARANG keras memakai script batch untuk menempel teks template generik.** Cepat bukan berarti dangkal. Setiap halaman harus terasa ditulis oleh manusia yang benar-benar membaca kodenya.
-6. **Batch & Paralel.** Baca file-file dalam satu folder secara paralel. Jika Folder Dok > 15 dan agent-mu mendukung sub-agent, pecah pengerjaan Fase 2 per sub-pohon level teratas (mis. `lib/core`, `lib/shared`, `lib/features/auth`).
+6. **Batch & Paralel.** Baca file-file dalam satu folder secara paralel. Jika Folder Dok > 15 dan agent-mu mendukung sub-agent, pecah pengerjaan Fase 2 per sub-pohon level teratas (mis. `src/modules/auth`, `internal/payments`, `app/services`, `lib/features/cart`).
 
 ---
 
@@ -108,7 +108,7 @@ Template di `SKILL_DIR/templates/` adalah **kotak bahan (building blocks)**, BUK
 
 Kamu **sangat dianjurkan menambah bagian ekstra** bila membuat pembaca lebih paham, misalnya:
 - `## 🤔 Kenapa Dibuat Seperti Ini?` (keputusan desain di kode, mis. kenapa ada alias prop lama demi backward compatibility, atau kenapa pakai interceptor terpisah)
-- `## ⚖️ Kapan Pakai X vs Y?` (mis. `AppAlert` vs `AppToast`, `AppButton.filled` vs `AppButton.tonal`)
+- `## ⚖️ Kapan Pakai X vs Y?` (mis. `Alert` vs `Toast`, `Redis` vs `in-memory cache`, `REST` vs `WebSocket`)
 - `## 🚨 Yang Terjadi Kalau Ada Error / Edge Case` (mis. token expired, koneksi putus, list kosong, layar tablet)
 
 ### 2.2 Aturan Kedalaman (WAJIB BEDAH KODE ASLI UNTUK SELURUH CODEBASE!)
@@ -119,30 +119,25 @@ Kamu **sangat dianjurkan menambah bagian ekstra** bila membuat pembaca lebih pah
   - **File pendek–sedang (≤ 120 baris):** tampilkan seluruh kode pentingnya (bisa dipecah per fungsi/method/blok logis) dan jelaskan tiap baris/bloknya.
   - **File besar (> 120 baris):** pecah per bagian nyata di dalam file (constructor/props → setiap method/handler → percabangan `if/else` & error handling → `build()`/`render()`) dan kutip kode asli tiap bagiannya agar **seluruh logika file benar-benar terjawab**, bukan cuma garis besar.
   - **Satu-satunya yang boleh disingkat:** file auto-generated (`*.g.dart`, `*.freezed.dart`, `*.pb.go`) atau barrel file re-export murni (`export '...';`).
-  - *Contoh format (hanya ilustrasi gaya — terapkan pola kutip + bedah seperti ini ke SEMUA file di codebase, bukan hanya `main()`):*
+  - *Contoh format (hanya ilustrasi gaya — terapkan pola kutip + bedah seperti ini ke SEMUA file di codebase dalam bahasa apa pun):*
     ````markdown
-    ```dart
-    Future<void> main() async {
-      if (kDebugMode) {
-        MarionetteBinding.ensureInitialized();
-      } else {
-        WidgetsFlutterBinding.ensureInitialized();
-      }
-      await ScreenUtil.ensureScreenSize();
-      unawaited(QuizSounds.instance.warmUp());
-      final dependencies = AppDependencies.create();
-      runApp(StudikuApp(dependencies: dependencies));
-      unawaited(dependencies.authCubit.bootstrap());
-    }
+    ```python
+    async def create_order(user_id: int, items: list[OrderItem], db: Session) -> Order:
+        if not items:
+            raise HTTPException(status_code=400, detail="Keranjang kosong")
+        total = sum(i.price * i.qty for i in items)
+        order = Order(user_id=user_id, total=total, status="pending")
+        db.add(order)
+        await db.commit()
+        background_tasks.add_task(send_invoice_email, order.id)
+        return order
     ```
 
     **Penjelasan baris demi baris:**
-    - `if (kDebugMode) ... else ...` → Menyalakan penghubung Flutter ke OS sebelum UI digambar. Saat development (`kDebugMode`), dipakai `MarionetteBinding` agar tool inspeksi bisa membaca widget; saat rilis ke user, pakai binding standar Flutter.
-    - `await ScreenUtil.ensureScreenSize()` → Menunggu ukuran layar HP terbaca dulu supaya skala responsif tidak kacau di frame pertama.
-    - `unawaited(QuizSounds.instance.warmUp())` → Menyiapkan audio kuis di belakang layar **tanpa** memblokir startup (`unawaited`), biar layar cepat muncul.
-    - `final dependencies = AppDependencies.create()` → Merakit semua kebutuhan inti (HTTP client, storage, repository, cubit) sebelum UI dibuat.
-    - `runApp(...)` → Menampilkan aplikasi ke layar.
-    - `unawaited(dependencies.authCubit.bootstrap())` → Sambil layar tampil, cek sesi/token login di belakang layar.
+    - `if not items: raise HTTPException(400, ...)` → Validasi awal di pintu masuk: kalau daftar belanja kosong, langsung tolak dengan error `400` sebelum menyentuh database.
+    - `total = sum(...)` → Total dihitung ulang di server dari harga item (bukan percaya angka dari client, supaya tidak bisa dimanipulasi).
+    - `Order(..., status="pending")` + `db.add` + `await db.commit()` → Simpan pesanan baru ke database dengan status awal `pending` (belum dibayar).
+    - `background_tasks.add_task(send_invoice_email, ...)` → Pengiriman email invoice dijalankan di belakang layar agar user langsung dapat respons tanpa menunggu server email selesai.
     ````
 - **Folder dengan 1–5 file/komponen/class:** tulis di `docs/<path-folder>/README.md`; **setiap file/komponen/class** WAJIB punya sub-judul `###` sendiri yang lengkap (penjelasan natural + **kutipan kode asli per bagian + bedah baris demi baris** + daftar lengkap props/method + lokasi pemakaian + contoh pakai).
 - **Folder dengan > 5 file/komponen/class** (mis. `shared/widgets/`, `components/ui/`, `services/`, `pages/`): buat **halaman detail terpisah** `docs/<path-folder>/<nama>.md` untuk **setiap file/komponen** menggunakan `SKILL_DIR/templates/component-doc-template.md`, lalu tautkan semuanya dari `docs/<path-folder>/README.md` dan `docs/_sidebar.md`.
@@ -162,7 +157,7 @@ Tulis seperti **senior developer yang ramah lagi ngobrol santai** menjelaskan ko
    - ❌ `"Menangani bagian X"` → ✅ jelaskan persis apa yang dilakukan!
 2. **Analogi natural, bukan dipaksakan.** Pakai analogi sehari-hari saat membantu pemahaman konsep (arsitektur, interceptor, state, cache, queue). Jangan memaksakan analogi aneh untuk hal yang sudah jelas (seperti tombol atau konstanta warna).
 3. **Kalimat pendek & mengalir.** Hindari kalimat 30+ kata yang berbelit. Jika istilah teknis muncul pertama kali (mis. "interceptor", "debouncing", "JWT"), jelaskan maknanya dalam 1 kalimat sederhana.
-4. **Selalu jangkarkan ke kode asli:** di bawah penjelasan konsep, sertakan nama file, class, method, atau props aslinya (mis. `> 🔧 **Di kode:** \`app_button.dart\` → \`AppButton\``).
+4. **Selalu jangkarkan ke kode asli:** di bawah penjelasan konsep, sertakan nama file, class, fungsi, atau props aslinya (mis. `> 🔧 **Di kode:** \`order_service.py\` → \`create_order()\`` atau `> 🔧 **Di kode:** \`Button.tsx\` → \`<Button variant="primary" />\``).
 5. **Akurasi > kelucuan.** Jangan pernah menyederhanakan sampai maknanya meleset dari kode asli.
 
 ### 2.4 Visual Adapter — Screenshot Ter-crop & Diagram Seperlunya
@@ -171,7 +166,7 @@ Tulis seperti **senior developer yang ramah lagi ngobrol santai** menjelaskan ko
 
 - **DILARANG** menulis `📸 Screenshot belum tersedia` sebelum kamu **benar-benar mengeksekusi perintah capture di terminal** dan melihat error nyatanya!
 - **JANGAN selalu screenshot satu layar penuh (full page)!**
-  - Untuk **komponen reusable** (button, badge, alert, text field, filter tag, pagination, card): **WAJIB crop ketat ke komponennya saja** — tampilkan beberapa variasi utama dalam 1 gambar ringkas (mis. `AppButton`: filled, tonal, outlined, text, loading, disabled).
+  - Untuk **komponen reusable** (button, badge, alert, text field, filter tag, pagination, card): **WAJIB crop ketat ke komponennya saja** — tampilkan beberapa variasi utama dalam 1 gambar ringkas (mis. `primary`, `secondary`, `outlined`, `loading`, `disabled`).
   - Screenshot **full page** hanya untuk halaman/layar utuh (`pages/`, `screens/`, `views/`).
 
 ##### 1. `web-ui` (React, Next.js, Vue, Nuxt, Svelte, Angular, Astro, Laravel Blade/Livewire, Rails ERB, Django, Blazor, Phoenix LiveView, Go Templ, Streamlit, HTML statis, dll.)
@@ -259,7 +254,7 @@ Gunakan `SKILL_DIR/templates/root-readme-template.md` sebagai acuan (tetap fleks
 2. **Kenapa pakai arsitektur ini?** — jelaskan pola arsitektur proyek (mis. Feature-First Clean Architecture / Modular Monolith / MVC), analoginya, dan **alasan kenapa dipisah seperti itu** (apa untungnya, bukan sekadar daftar folder).
 3. **Diagram arsitektur** (`flowchart LR`) yang menunjukkan aliran data antar lapisan utama.
 4. **Library & Package Utama (+ perbandingan pesaing)** — tampilkan ringkasan di `docs/README.md` atau buat halaman khusus `docs/tech-stack.md` (tautkan di `docs/_sidebar.md`!) berisi: package, perannya, dipakai di mana, alternatif/pesaingnya, serta kelebihan & kekurangannya.
-5. **Peta Navigasi** ke semua area utama (tautan relatif di dalam `docs/`, mis. `lib/shared/widgets/README.md`).
+5. **Peta Navigasi** ke semua area utama (tautan relatif di dalam `docs/`, mis. `src/modules/auth/README.md` atau `internal/orders/README.md`).
 6. **Cara menjalankan proyek** & **cara membuka dokumentasi** (`babydocs serve --open`).
 
 ### 3.2 `docs/_sidebar.md`
@@ -268,7 +263,7 @@ Gunakan `SKILL_DIR/templates/_sidebar-template.md` sebagai acuan:
 - Baris pertama: `- [Beranda](/)` (atau dengan 1 ikon rapi).
 - Jika membuat `docs/tech-stack.md`, tautkan di bagian atas (mis. `- [Arsitektur & Tech Stack](tech-stack.md)`).
 - **Indentasi WAJIB tepat 2 spasi per level** dan **tidak pernah melompati level** (melompat dari 0 ke 4+ spasi membuat Docsify merendernya sebagai code block!). Maksimal 3 level indentasi.
-- Path relatif dari dalam `docs/` tanpa `./` di depan (mis. `lib/shared/widgets/README.md`). Setiap `README.md` dan `<komponen>.md` di dalam `docs/` harus muncul di sidebar.
+- Path relatif dari dalam `docs/` tanpa `./` di depan (mis. `src/modules/auth/README.md`). Setiap `README.md` dan `<komponen>.md` di dalam `docs/` harus muncul di sidebar.
 - Gunakan label yang natural (mis. `Shared Widgets`, `Network & API`, `Auth`, bukan terjemahan kaku seperti `Widget Bersama`).
 
 ### 3.3 `docs/index.html` dan `docs/.nojekyll`
