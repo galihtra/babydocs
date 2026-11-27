@@ -15,7 +15,7 @@ No manual Python or `PATH` setup required. The installer checks your machine, in
 **macOS / Linux:**
 
 ```bash
-git clone <repo-url> ~/babydocs
+git clone https://github.com/galihtra/babydocs.git ~/babydocs
 cd ~/babydocs
 ./install.sh
 ```
