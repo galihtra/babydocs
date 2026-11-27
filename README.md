@@ -1,4 +1,8 @@
-# 🪆 babydocs
+<p align="left">
+  <img src="assets/icon.png" alt="babydocs" width="76" />
+</p>
+
+# babydocs
 
 An agent skill and CLI that turns any codebase into browsable, folder-by-folder web documentation written in plain language.
 
@@ -119,6 +123,8 @@ Nothing extra is required—if a screenshot tool is missing, `babydocs` falls ba
 babydocs/
 ├── SKILL.md
 ├── README.md
+├── assets/
+│   └── icon.png
 ├── install.sh
 ├── install.ps1
 ├── install.bat
