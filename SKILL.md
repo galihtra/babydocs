@@ -111,10 +111,38 @@ Kamu **sangat dianjurkan menambah bagian ekstra** bila membuat pembaca lebih pah
 - `## ⚖️ Kapan Pakai X vs Y?` (mis. `AppAlert` vs `AppToast`, `AppButton.filled` vs `AppButton.tonal`)
 - `## 🚨 Yang Terjadi Kalau Ada Error / Edge Case` (mis. token expired, koneksi putus, list kosong, layar tablet)
 
-### 2.2 Aturan Kedalaman (ANTI-DANGKAL)
+### 2.2 Aturan Kedalaman (ANTI-DANGKAL — WAJIB KUTIP & BEDAH KODE ASLI!)
 
-- **DILARANG** memadatkan banyak komponen/class ke dalam 1 tabel ringkasan 1-baris saja!
-- **Folder dengan 1–5 komponen/class/file penting:** tulis di `docs/<path-folder>/README.md`; masing-masing WAJIB punya sub-judul `###` sendiri yang lengkap (analogi natural + alur internal kode langkah demi langkah + daftar lengkap props/method + lokasi pemakaian + contoh pakai).
+- **DILARANG** hanya merangkum secara abstrak atau memadatkan banyak komponen/class ke dalam 1 tabel 1-baris!
+- **WAJIB Kutip Kode Asli + Jelaskan Baris demi Baris / Blok demi Blok:**
+  Untuk setiap fungsi kunci, entry point (`main()`, router, interceptor, method inti, `build()` komponen, endpoint), **kutip potongan kode aslinya** langsung dari file sumber (sekitar 8–40 baris yang paling penting — persis dari kode, jangan mengarang!), lalu **bedah baris demi baris / blok demi blok** tepat di bawahnya: jelaskan **apa yang dilakukan** DAN **kenapa ditulis begitu** (urutan eksekusi, alasan pakai `unawaited`/async, `if/else`, fallback, dll.).
+  - Contoh format yang bagus:
+    ````markdown
+    ```dart
+    Future<void> main() async {
+      if (kDebugMode) {
+        MarionetteBinding.ensureInitialized();
+      } else {
+        WidgetsFlutterBinding.ensureInitialized();
+      }
+      await ScreenUtil.ensureScreenSize();
+      unawaited(QuizSounds.instance.warmUp());
+      final dependencies = AppDependencies.create();
+      runApp(StudikuApp(dependencies: dependencies));
+      unawaited(dependencies.authCubit.bootstrap());
+    }
+    ```
+
+    **Penjelasan baris demi baris:**
+    - `if (kDebugMode) ... else ...` → Menyalakan penghubung Flutter ke OS sebelum UI digambar. Saat development (`kDebugMode`), dipakai `MarionetteBinding` agar tool inspeksi bisa membaca widget; saat rilis ke user, pakai binding standar Flutter.
+    - `await ScreenUtil.ensureScreenSize()` → Menunggu ukuran layar HP terbaca dulu supaya skala responsif tidak kacau di frame pertama.
+    - `unawaited(QuizSounds.instance.warmUp())` → Menyiapkan audio kuis di belakang layar **tanpa** memblokir startup (`unawaited`), biar layar cepat muncul.
+    - `final dependencies = AppDependencies.create()` → Merakit semua kebutuhan inti (HTTP client, storage, repository, cubit) sebelum UI dibuat.
+    - `runApp(...)` → Menampilkan aplikasi ke layar.
+    - `unawaited(dependencies.authCubit.bootstrap())` → Sambil layar tampil, cek sesi/token login di belakang layar.
+    ````
+  - Untuk file panjang (> 50 baris), kutip **bagian-bagian kuncinya** saja (jangan dump 300 baris mentah sekaligus tanpa penjelasan).
+- **Folder dengan 1–5 komponen/class/file penting:** tulis di `docs/<path-folder>/README.md`; masing-masing WAJIB punya sub-judul `###` sendiri yang lengkap (analogi natural + **potongan kode asli + bedah baris demi baris** + daftar lengkap props/method + lokasi pemakaian + contoh pakai).
 - **Folder dengan > 5 komponen reusable / class penting** (mis. `shared/widgets/`, `components/ui/`, `services/`): buat **halaman detail terpisah** `docs/<path-folder>/<nama>.md` menggunakan `SKILL_DIR/templates/component-doc-template.md`, lalu tautkan dari `docs/<path-folder>/README.md` dan `docs/_sidebar.md`.
 - **Wajib sertakan "Dipakai di Mana Saja"** untuk setiap reusable component/widget/service/helper dengan mencari pemakaian nyatanya lewat `rg -l` / `grep -rl` (mis. *"Dipakai di 14 file, antara lain: `login_screen.dart`, `register_screen.dart`, `checkout_page.dart`"*).
 

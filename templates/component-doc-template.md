@@ -21,13 +21,17 @@
 
 ---
 
-## Cara Kerjanya di Dalam Kode
+## Bedah Kode Asli (Baris demi Baris)
 
-{{2–4 kalimat pengantar yang santai, lalu uraikan alur nyata di dalam kode (if/else, validasi, state, fallback, alasan desain):}}
+{{1–3 kalimat pengantar santai, lalu kutip potongan kode kunci langsung dari file sumber dan jelaskan tiap baris/bloknya:}}
 
-1. **{{Alur utama}}** — {{penjelasan singkat}} (`{{method/baris logika}}`)
-2. **{{Saat loading / disabled / kosong}}** — {{penjelasan singkat}} (`{{kondisi}}`)
-3. **{{Kasus khusus / kompatibilitas / layar kecil-besar}}** — {{penjelasan singkat}} (`{{kondisi}}`)
+```{{bahasa}}
+{{POTONGAN_KODE_ASLI_KUNCI — 8 s.d. 40 baris persis dari file sumber}}
+```
+
+- `{{baris / blok 1}}` → {{apa yang dilakukan + kenapa ditulis begitu}}
+- `{{baris / blok 2}}` → {{apa yang terjadi saat loading / disabled / kosong / error}}
+- `{{baris / blok 3}}` → {{kasus khusus / alasan desain / kompatibilitas}}
 
 ---
 

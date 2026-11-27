@@ -60,9 +60,14 @@ flowchart TD
 
 **Dipakai di mana saja:** {{hasil pencarian rg/grep nyata, mis. "Dipakai di 9 layar: `login_screen.dart`, `register_screen.dart`, ..."}}
 
-**Cara kerja di dalam kode:**
-1. {{Alur nyata langkah 1}} (`{{kondisi/method}}`)
-2. {{Alur nyata langkah 2 — termasuk kasus khusus seperti loading, disabled, error, fallback}} (`{{kondisi/method}}`)
+**Cara kerja di dalam kode (kutipan asli + bedah baris demi baris):**
+
+```{{bahasa}}
+{{POTONGAN_KODE_ASLI_KUNCI — 8 s.d. 40 baris persis dari file sumber}}
+```
+
+- `{{baris/blok 1}}` → {{apa yang dilakukan + kenapa ditulis seperti itu}}
+- `{{baris/blok 2}}` → {{apa yang dilakukan — termasuk kasus loading, disabled, error, atau fallback}}
 
 **Props / Parameter:**
 
