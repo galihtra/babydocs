@@ -23,12 +23,15 @@ Kode rumit  ──►  🤖 Agent + skill ini  ──►  📚 Web docs yang bis
 babydocs/
 ├── SKILL.md                            # Instruksi utama untuk AI agent
 ├── README.md                           # File ini
-├── install.sh                          # Pasang perintah `babydocs` ke PATH
+├── install.sh                          # Installer 1-langkah macOS/Linux (auto-install Python + PATH + link skill)
+├── install.ps1                         # Installer 1-langkah Windows (PowerShell)
+├── install.bat                         # Klik dua kali untuk pengguna Windows
 ├── bin/
-│   ├── babydocs                        # CLI: serve, init, check, scan
-│   └── babydocs.cmd                    # Versi Windows
+│   ├── babydocs                        # Launcher macOS/Linux (auto-install Python jika belum ada)
+│   └── babydocs.cmd                    # Launcher Windows (auto-install Python jika belum ada)
 ├── scripts/
-│   └── scan.py                         # Scanner cepat: stack + peta folder + kerangka kode (Python stdlib)
+│   ├── cli.py                          # CLI: serve, init, check, scan, doctor
+│   └── scan.py                         # Scanner cepat: stack + peta folder + kerangka kode
 └── templates/
     ├── index.html                      # Docsify (Search, Copy Code, Mermaid, Zoom)
     ├── folder-readme-template.md       # Template README per sub-folder
@@ -36,36 +39,33 @@ babydocs/
     └── _sidebar-template.md            # Contoh format sidebar
 ```
 
-## 📦 Instalasi
+## 📦 Instalasi (1 Langkah — Otomatis untuk Pemula)
 
-Skill ini mengikuti format standar **Agent Skills** (folder berisi `SKILL.md` dengan frontmatter `name` + `description`). Salin/clone foldernya ke direktori skill milik agent yang kamu pakai:
+Tidak perlu install Python atau setting `PATH` manual. Installer akan mengecek sistemmu, memasang kebutuhan yang kurang secara otomatis, mendaftarkan perintah `babydocs`, dan menghubungkan skill ke coding agent yang sudah terpasang.
 
-| Agent | Lokasi skill global | Lokasi skill per proyek |
-|---|---|---|
-| Antigravity | `~/.gemini/antigravity/skills/babydocs/` | `<proyek>/.agents/skills/babydocs/` |
-| Claude Code | `~/.claude/skills/babydocs/` | `<proyek>/.claude/skills/babydocs/` |
-| Gemini CLI | `~/.gemini/skills/babydocs/` | `<proyek>/.gemini/skills/babydocs/` |
-| Codex / Cursor / lainnya | Folder skill/rules agent tsb. | Atau rujuk langsung: *"ikuti instruksi di `/path/babydocs/SKILL.md`"* |
-
-Contoh (global, via symlink agar mudah di-update):
+### macOS / Linux
 
 ```bash
-git clone <url-repo-ini> ~/skills/babydocs
-mkdir -p ~/.claude/skills
-ln -s ~/skills/babydocs ~/.claude/skills/babydocs
+git clone <url-repo-ini> ~/babydocs
+cd ~/babydocs
+./install.sh
 ```
 
-> Pastikan folder `templates/`, `scripts/`, dan `bin/` ikut tersalin — `SKILL.md` merujuk ke sana.
+### Windows
 
-### Pasang perintah `babydocs` di terminal
+1. Download / clone repo ini.
+2. **Klik dua kali `install.bat`** (atau jalankan `.\install.ps1` di PowerShell).
+3. Tutup lalu buka ulang terminal.
+
+> Installer otomatis menghubungkan skill ke **Antigravity** (`~/.gemini/antigravity/skills`), **Claude Code** (`~/.claude/skills`), dan **Gemini CLI** (`~/.gemini/skills`) jika foldernya terdeteksi.
+>
+> Untuk agent lain (Codex, Cursor, dll.), cukup arahkan ke folder ini atau tulis: *"ikuti instruksi di `~/babydocs/SKILL.md`"*.
+
+Cek apakah semuanya sudah siap:
 
 ```bash
-cd ~/skills/babydocs
-./install.sh                 # memasang ke ~/.local/bin/babydocs
-babydocs --help
+babydocs doctor
 ```
-
-Windows: tambahkan folder `bin/` ke `PATH` (berisi `babydocs.cmd`).
 
 ## 🚀 Cara Memanggil
 
@@ -137,6 +137,7 @@ Tidak ada dependensi wajib. Visual dipilih otomatis; jika alat tidak tersedia, s
 | `babydocs init` | Pasang `index.html` + `.nojekyll` di proyek |
 | `babydocs check` | Cek link sidebar, gambar, placeholder yang tertinggal |
 | `babydocs scan` | Buat Peta Proyek (dipakai agent) |
+| `babydocs doctor` | Cek kesiapan sistem (runtime, git, alat screenshot opsional) |
 
 ## 👀 Preview Web Dokumentasi Secara Lokal
 

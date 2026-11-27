@@ -35,7 +35,7 @@ Kerjakan fase **0 → 4 secara berurutan**. Jangan lompat fase. Jangan berhenti 
 1. Tetapkan `PROJECT_ROOT` = direktori kerja saat ini (atau path yang disebut user).
 2. Tetapkan `SKILL_DIR` = folder tempat `SKILL.md` ini berada. Pastikan file berikut ada:
    - `SKILL_DIR/scripts/scan.py`
-   - `SKILL_DIR/bin/babydocs` (CLI: `scan`, `init`, `check`, `serve`). Jika perintah `babydocs` sudah ada di PATH, kamu boleh memanggilnya langsung; jika tidak, pakai `python3 "SKILL_DIR/bin/babydocs" <perintah>`.
+   - `SKILL_DIR/bin/babydocs` (CLI: `scan`, `init`, `check`, `serve`, `doctor`). Jika perintah `babydocs` belum ada di PATH, jalankan `sh "SKILL_DIR/install.sh"` (macOS/Linux) atau `powershell -ExecutionPolicy Bypass -File "SKILL_DIR\install.ps1"` (Windows) agar perintah `babydocs` terpasang sekaligus auto-install Python bila belum ada. Kamu juga bisa langsung memanggil `"SKILL_DIR/bin/babydocs" <perintah>` (otomatis memasang Python jika belum ada).
    - `SKILL_DIR/templates/index.html`
    - `SKILL_DIR/templates/folder-readme-template.md`
    - `SKILL_DIR/templates/root-readme-template.md`
@@ -70,7 +70,7 @@ Tujuan: memahami seluruh codebase dengan **jumlah pembacaan file seminimal mungk
 ### 1.0 Jalankan scanner (langkah pertama, satu perintah)
 
 ```bash
-python3 "SKILL_DIR/bin/babydocs" scan "PROJECT_ROOT" --out /tmp/babydocs-peta.md
+"SKILL_DIR/bin/babydocs" scan "PROJECT_ROOT" --out /tmp/babydocs-peta.md
 # opsional: --only src/features   (batasi ke sub-folder)
 #           --json                (output JSON untuk diproses lebih lanjut)
 ```
@@ -390,7 +390,7 @@ Gunakan `SKILL_DIR/templates/_sidebar-template.md` sebagai acuan format.
 
 ### 3.3 `index.html` dan `.nojekyll`
 
-1. Jalankan `python3 "SKILL_DIR/bin/babydocs" init "PROJECT_ROOT"`. Perintah ini otomatis:
+1. Jalankan `"SKILL_DIR/bin/babydocs" init "PROJECT_ROOT"`. Perintah ini otomatis:
    - menyalin `SKILL_DIR/templates/index.html` → `PROJECT_ROOT/index.html` dan mengisi `{{PROJECT_NAME}}` serta `{{REPO_URL}}` (atau menghapus baris `repo:` jika tidak ada remote git);
    - memakai `docs.html` jika `index.html` milik aplikasi sudah ada (tidak pernah menimpa);
    - membuat `.nojekyll` (wajib agar GitHub Pages tidak menyembunyikan `_sidebar.md`).
@@ -409,7 +409,7 @@ babydocs serve            # buka http://localhost:3000
 babydocs serve --open     # sekaligus membuka browser
 ```
 
-Jika `babydocs` belum terpasang di PATH user, sebutkan: `python3 <path-skill>/bin/babydocs serve`.
+Jika `babydocs` belum terpasang di PATH user, pasang dulu dengan `sh "SKILL_DIR/install.sh"` (auto-install kebutuhan sistem + PATH), lalu sampaikan cukup `babydocs serve --open` ke user.
 
 Dokumentasi tidak bisa dibuka lewat `file://` (klik dua kali file HTML). Harus lewat `babydocs serve` atau GitHub Pages (Settings → Pages → Deploy from branch → root).
 
@@ -421,13 +421,13 @@ Jalankan pemeriksaan berikut dari `PROJECT_ROOT`, perbaiki setiap kegagalan, lal
 
 1. **Pemeriksaan otomatis (placeholder, gambar, link sidebar, index.html, .nojekyll, file sementara):**
    ```bash
-   python3 "SKILL_DIR/bin/babydocs" check "PROJECT_ROOT"
+   "SKILL_DIR/bin/babydocs" check "PROJECT_ROOT"
    ```
    Harus menampilkan `✓ Semua beres`.
 2. **Mermaid valid:** periksa ulang setiap blok terhadap aturan sintaks 2.4.C. Jika `@mermaid-js/mermaid-cli` tersedia, boleh validasi dengan `npx -y @mermaid-js/mermaid-cli -i <file.md> -o /tmp/babydocs-check.md`.
 3. **Proses latar belakang mati:** dev server, Metro, emulator yang kamu nyalakan.
 4. **Source code tidak berubah:** `git status --porcelain` hanya menampilkan `README.md`, `assets/`, `_sidebar.md`, `index.html`/`docs.html`, `.nojekyll`.
-5. (Opsional) Jalankan `python3 "SKILL_DIR/bin/babydocs" serve "PROJECT_ROOT" --port 3999 --no-reload` di latar belakang dan, jika Playwright tersedia, ambil screenshot `http://localhost:3999` untuk memastikan halaman depan, sidebar, dan minimal satu diagram Mermaid tampil. Matikan server setelahnya.
+5. (Opsional) Jalankan `"SKILL_DIR/bin/babydocs" serve "PROJECT_ROOT" --port 3999 --no-reload` di latar belakang dan, jika Playwright tersedia, ambil screenshot `http://localhost:3999` untuk memastikan halaman depan, sidebar, dan minimal satu diagram Mermaid tampil. Matikan server setelahnya.
 
 **Laporan akhir ke user** (ringkas, maks. 20 baris):
 - Stack & tipe yang terdeteksi.
